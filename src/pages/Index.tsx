@@ -4,6 +4,7 @@ import Sidebar from "@/components/Sidebar";
 import VideoCard from "@/components/VideoCard";
 import { cn } from "@/lib/utils";
 import { useVideos } from "@/hooks/useVideos";
+import { useDeleteVideo } from "@/hooks/useDeleteVideo";
 import { formatViewCount, formatTimeAgo } from "@/utils/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -18,6 +19,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const { data: videos = [], isLoading, error } = useVideos();
+  const deleteVideoMutation = useDeleteVideo();
 
   // Fallback thumbnails mapping
   const fallbackThumbnails = [
@@ -92,6 +94,7 @@ const Index = () => {
                 {videos.map((video, index) => (
                   <VideoCard
                     key={video.id}
+                    id={video.id}
                     thumbnail={getVideoThumbnail(video.thumbnail_url, index)}
                     title={video.title}
                     channel={video.creator?.name || "Créateur inconnu"}
@@ -99,6 +102,7 @@ const Index = () => {
                     timestamp={formatTimeAgo(video.created_at)}
                     duration={video.duration}
                     channelAvatar={video.creator?.avatar_url}
+                    onDelete={(videoId) => deleteVideoMutation.mutate(videoId)}
                   />
                 ))}
               </div>

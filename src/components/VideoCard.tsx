@@ -1,9 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface VideoCardProps {
+  id: string;
   thumbnail: string;
   title: string;
   channel: string;
@@ -11,9 +14,11 @@ interface VideoCardProps {
   timestamp: string;
   duration: string;
   channelAvatar?: string;
+  onDelete?: (id: string) => void;
 }
 
 const VideoCard = ({
+  id,
   thumbnail,
   title,
   channel,
@@ -21,6 +26,7 @@ const VideoCard = ({
   timestamp,
   duration,
   channelAvatar,
+  onDelete,
 }: VideoCardProps) => {
   const isMobile = useIsMobile();
   
@@ -38,6 +44,19 @@ const VideoCard = ({
             <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded backdrop-blur-sm font-medium">
               {duration}
             </div>
+          )}
+          {onDelete && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(id);
+              }}
+              size="icon"
+              variant="destructive"
+              className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           )}
         </div>
 
