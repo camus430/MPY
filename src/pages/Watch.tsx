@@ -8,7 +8,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { useDownloads } from "@/hooks/useDownloads";
-import BackgroundAudioPlayer from "@/components/BackgroundAudioPlayer";
 import type { VideoWithCreator } from "@/types/database";
 
 const Watch = () => {
@@ -235,9 +234,6 @@ const Watch = () => {
           </div>
         </div>
       </div>
-
-      {/* Background Audio Player */}
-      <BackgroundAudioPlayer videoData={audioPlayerData} />
     </div>
   );
 };

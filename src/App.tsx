@@ -12,48 +12,56 @@ import Auth from "./pages/Auth";
 import Watch from "./pages/Watch";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { initializeCapacitor } from "./utils/capacitor-init";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Layout>
-                <Index />
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/creators" element={
-            <ProtectedRoute>
-              <Layout>
-                <Creators />
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/downloads" element={
-            <ProtectedRoute>
-              <Layout>
-                <Downloads />
-              </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/watch/:videoId" element={
-            <ProtectedRoute>
-              <Watch />
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  // Initialize Capacitor after React is ready
+  React.useEffect(() => {
+    initializeCapacitor();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Index />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/creators" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Creators />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/downloads" element={
+              <ProtectedRoute>
+                <Layout>
+                  <Downloads />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/watch/:videoId" element={
+              <ProtectedRoute>
+                <Watch />
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

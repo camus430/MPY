@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import { App } from '@capacitor/app';
+import React, { useEffect, useRef, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 
 interface AudioMetadata {
@@ -29,7 +28,6 @@ export const useBackgroundAudio = () => {
     
     // Essential for iOS background playback
     audio.setAttribute('playsinline', 'true');
-    audio.setAttribute('webkit-playsinline', 'true');
     
     audio.src = src;
     audioRef.current = audio;
@@ -47,15 +45,6 @@ export const useBackgroundAudio = () => {
 
     audio.addEventListener('play', () => {
       setIsPlaying(true);
-      if (Capacitor.isNativePlatform()) {
-        // Keep app alive in background
-        App.addListener('appStateChange', ({ isActive }) => {
-          if (!isActive && audio && !audio.paused) {
-            // App went to background while playing - continue playback
-            console.log('App backgrounded, continuing audio playback');
-          }
-        });
-      }
     });
 
     audio.addEventListener('pause', () => {
@@ -67,7 +56,6 @@ export const useBackgroundAudio = () => {
       setCurrentTime(0);
     });
 
-    // Error handling
     audio.addEventListener('error', (e) => {
       console.error('Audio error:', e);
       setIsPlaying(false);
@@ -76,84 +64,45 @@ export const useBackgroundAudio = () => {
     return audio;
   };
 
-  // Update Media Session API for lock screen controls and Dynamic Island
+  // Update Media Session API for lock screen controls
   const updateMediaSession = (meta: AudioMetadata, audioDuration?: number) => {
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: meta.title,
-        artist: meta.artist,
-        album: meta.album || 'Mon Petit YouTube',
-        artwork: meta.artwork ? [
-          { src: meta.artwork, sizes: '96x96', type: 'image/png' },
-          { src: meta.artwork, sizes: '128x128', type: 'image/png' },
-          { src: meta.artwork, sizes: '192x192', type: 'image/png' },
-          { src: meta.artwork, sizes: '256x256', type: 'image/png' },
-          { src: meta.artwork, sizes: '384x384', type: 'image/png' },
-          { src: meta.artwork, sizes: '512x512', type: 'image/png' },
-        ] : undefined,
-      });
-
-      // Set up action handlers for lock screen controls
-      navigator.mediaSession.setActionHandler('play', () => {
-        audioRef.current?.play();
-      });
-
-      navigator.mediaSession.setActionHandler('pause', () => {
-        audioRef.current?.pause();
-      });
-
-      navigator.mediaSession.setActionHandler('seekbackward', (details) => {
-        const skipTime = details.seekOffset || 10;
-        if (audioRef.current) {
-          audioRef.current.currentTime = Math.max(audioRef.current.currentTime - skipTime, 0);
-        }
-      });
-
-      navigator.mediaSession.setActionHandler('seekforward', (details) => {
-        const skipTime = details.seekOffset || 10;
-        if (audioRef.current) {
-          audioRef.current.currentTime = Math.min(
-            audioRef.current.currentTime + skipTime,
-            audioRef.current.duration
-          );
-        }
-      });
-
-      navigator.mediaSession.setActionHandler('seekto', (details) => {
-        if (details.seekTime && audioRef.current) {
-          audioRef.current.currentTime = details.seekTime;
-        }
-      });
-
-      // Update playback state for Dynamic Island
-      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
-
-      // Set position state for progress bar
-      if (audioDuration) {
-        navigator.mediaSession.setPositionState({
-          duration: audioDuration,
-          playbackRate: 1,
-          position: currentTime,
+    try {
+      if ('mediaSession' in navigator && navigator.mediaSession) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: meta.title,
+          artist: meta.artist,
+          album: meta.album || 'Mon Petit YouTube',
+          artwork: meta.artwork ? [
+            { src: meta.artwork, sizes: '96x96', type: 'image/png' },
+            { src: meta.artwork, sizes: '512x512', type: 'image/png' },
+          ] : undefined,
         });
+
+        // Set up action handlers for lock screen controls
+        navigator.mediaSession.setActionHandler('play', () => {
+          audioRef.current?.play();
+        });
+
+        navigator.mediaSession.setActionHandler('pause', () => {
+          audioRef.current?.pause();
+        });
+
+        // Update playback state
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
       }
+    } catch (error) {
+      console.log('Media Session API not available:', error);
     }
   };
 
-  // Update position state when time changes
-  useEffect(() => {
-    if ('mediaSession' in navigator && duration > 0) {
-      navigator.mediaSession.setPositionState({
-        duration,
-        playbackRate: 1,
-        position: currentTime,
-      });
-    }
-  }, [currentTime, duration]);
-
   // Update playback state when play/pause changes
   useEffect(() => {
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    try {
+      if ('mediaSession' in navigator && navigator.mediaSession) {
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+      }
+    } catch (error) {
+      console.log('Media Session update failed:', error);
     }
   }, [isPlaying]);
 
