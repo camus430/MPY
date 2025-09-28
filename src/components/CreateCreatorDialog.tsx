@@ -20,7 +20,7 @@ const CreateCreatorDialog = () => {
   const [open, setOpen] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [isLoadingYoutube, setIsLoadingYoutube] = useState(false);
-  const [creatorData, setCreatorData] = useState<CreateCreatorData | null>(null);
+  const [creatorData, setCreatorData] = useState<CreateCreatorData & { channel_id?: string } | null>(null);
 
   const createCreator = useCreateCreator();
   const { toast } = useToast();
@@ -55,6 +55,7 @@ const CreateCreatorDialog = () => {
         avatar_url: data.avatar_url,
         description: data.description,
         subscriber_count: data.subscriber_count,
+        channel_id: data.channel_id,
       });
 
       toast({

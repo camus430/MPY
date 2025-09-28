@@ -11,6 +11,7 @@ interface YouTubeChannelInfo {
   avatar_url: string;
   subscriber_count: number;
   description: string;
+  channel_id?: string;
 }
 
 function extractChannelId(url: string): string | null {
@@ -102,7 +103,8 @@ async function getChannelInfo(channelIdentifier: string): Promise<YouTubeChannel
       name: channel.snippet.title,
       avatar_url: channel.snippet.thumbnails?.high?.url || channel.snippet.thumbnails?.default?.url || '',
       subscriber_count: parseInt(channel.statistics?.subscriberCount || '0'),
-      description: channel.snippet.description || ''
+      description: channel.snippet.description || '',
+      channel_id: channel.id
     };
   }
   
@@ -111,7 +113,8 @@ async function getChannelInfo(channelIdentifier: string): Promise<YouTubeChannel
     name: channel.snippet.title,
     avatar_url: channel.snippet.thumbnails?.high?.url || channel.snippet.thumbnails?.default?.url || '',
     subscriber_count: parseInt(channel.statistics?.subscriberCount || '0'),
-    description: channel.snippet.description || ''
+    description: channel.snippet.description || '',
+    channel_id: channel.id
   };
 }
 

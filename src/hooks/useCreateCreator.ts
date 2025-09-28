@@ -17,7 +17,7 @@ export const useCreateCreator = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: CreateCreatorData) => {
+    mutationFn: async (data: CreateCreatorData & { channel_id?: string }) => {
       // Validate data
       const validatedData = creatorSchema.parse(data);
       
@@ -36,14 +36,31 @@ export const useCreateCreator = () => {
         throw error;
       }
 
+      // If we have a channel_id, fetch and insert videos
+      if (data.channel_id) {
+        try {
+          console.log('Fetching videos for channel:', data.channel_id);
+          await supabase.functions.invoke('get-youtube-videos', {
+            body: { 
+              creator_id: creator.id, 
+              channel_id: data.channel_id 
+            }
+          });
+        } catch (videoError) {
+          console.error('Error fetching videos:', videoError);
+          // Don't fail the creator creation if video fetching fails
+        }
+      }
+
       return creator;
     },
     onSuccess: () => {
-      // Invalidate and refetch creators
+      // Invalidate and refetch creators and videos
       queryClient.invalidateQueries({ queryKey: ["creators"] });
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
       toast({
         title: "Succès",
-        description: "Le créateur a été ajouté avec succès",
+        description: "Le créateur et ses vidéos ont été ajoutés avec succès",
       });
     },
     onError: (error) => {

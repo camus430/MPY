@@ -69,3 +69,6 @@ max_sms_per_hour = 60
 
 [functions.get-youtube-creator]
 verify_jwt = false
+
+[functions.get-youtube-videos]
+verify_jwt = false
