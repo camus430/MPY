@@ -4,8 +4,11 @@ import { useDeleteVideo } from "@/hooks/useDeleteVideo";
 import { formatViewCount, formatTimeAgo } from "@/utils/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { RefreshCw, X, Filter } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
+import { useMemo } from "react";
 
 // Importing generated images to use as fallback thumbnails
 import thumbnailCoding from "@/assets/thumbnail-coding.jpg";
@@ -17,6 +20,17 @@ const Index = () => {
   const { data: videos = [], isLoading, error, refetch } = useVideos();
   const deleteVideoMutation = useDeleteVideo();
   const queryClient = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Get filter parameters from URL
+  const creatorIdFilter = searchParams.get('creator');
+  const creatorNameFilter = searchParams.get('name');
+
+  // Filter videos by creator if specified
+  const filteredVideos = useMemo(() => {
+    if (!creatorIdFilter) return videos;
+    return videos.filter(video => video.creator_id === creatorIdFilter);
+  }, [videos, creatorIdFilter]);
 
   // Fallback thumbnails mapping
   const fallbackThumbnails = [
@@ -37,6 +51,10 @@ const Index = () => {
     queryClient.invalidateQueries({ queryKey: ["videos"] });
     queryClient.invalidateQueries({ queryKey: ["creators"] });
     refetch();
+  };
+
+  const clearFilter = () => {
+    setSearchParams({});
   };
 
   if (error) {
@@ -61,15 +79,33 @@ const Index = () => {
       <div className="w-full max-w-[1400px] mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Vidéos</h1>
+            <h1 className="text-2xl font-bold text-foreground">
+              {creatorNameFilter ? `Vidéos de ${creatorNameFilter}` : 'Toutes les vidéos'}
+            </h1>
             <p className="text-sm text-muted-foreground">
-              {videos.length} vidéo{videos.length !== 1 ? 's' : ''} trouvée{videos.length !== 1 ? 's' : ''}
+              {filteredVideos.length} vidéo{filteredVideos.length !== 1 ? 's' : ''} trouvée{filteredVideos.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <Button onClick={handleRefresh} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Actualiser
-          </Button>
+          <div className="flex items-center gap-2">
+            {creatorIdFilter && (
+              <Badge variant="secondary" className="flex items-center gap-2">
+                <Filter className="h-3 w-3" />
+                {creatorNameFilter}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={clearFilter}
+                  className="h-auto p-0 hover:bg-transparent"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            )}
+            <Button onClick={handleRefresh} variant="outline" size="sm">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Actualiser
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -88,22 +124,37 @@ const Index = () => {
               </div>
             ))}
           </div>
-        ) : videos.length === 0 ? (
+        ) : filteredVideos.length === 0 ? (
           <div className="flex items-center justify-center min-h-[50vh]">
             <div className="text-center">
-              <h2 className="text-xl font-semibold mb-2">Aucune vidéo trouvée</h2>
+              <h2 className="text-xl font-semibold mb-2">
+                {creatorNameFilter 
+                  ? `Aucune vidéo de ${creatorNameFilter}` 
+                  : 'Aucune vidéo trouvée'
+                }
+              </h2>
               <p className="text-muted-foreground mb-4">
-                Ajoutez des créateurs pour voir leurs vidéos apparaître ici
+                {creatorNameFilter 
+                  ? 'Ce créateur n\'a pas encore de vidéos synchronisées'
+                  : 'Ajoutez des créateurs pour voir leurs vidéos apparaître ici'
+                }
               </p>
-              <Button onClick={handleRefresh} variant="outline">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Actualiser
-              </Button>
+              <div className="flex gap-2 justify-center">
+                {creatorIdFilter && (
+                  <Button onClick={clearFilter} variant="outline">
+                    Voir toutes les vidéos
+                  </Button>
+                )}
+                <Button onClick={handleRefresh} variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Actualiser
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 justify-items-center">
-            {videos.map((video, index) => (
+            {filteredVideos.map((video, index) => (
               <div key={video.id} className="w-full max-w-sm">
                 <VideoCard
                   id={video.id}

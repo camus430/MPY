@@ -14,9 +14,9 @@ import {
 
 const menuItems = [
   { icon: Home, label: "Accueil", path: "/" },
+  { icon: Users, label: "Abonnements", path: "/subscriptions" },
   { icon: UserCheck, label: "Créateurs", path: "/creators" },
   { icon: TrendingUp, label: "Tendances", path: "#" },
-  { icon: Users, label: "Abonnements", path: "#" },
   { icon: PlaySquare, label: "Bibliothèque", path: "#" },
   { icon: Clock, label: "Historique", path: "#" },
   { icon: ThumbsUp, label: "Vidéos likées", path: "#" },

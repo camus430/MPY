@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "@/components/Layout";
 import Index from "./pages/Index";
 import Creators from "./pages/Creators";
+import Subscriptions from "./pages/Subscriptions";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -31,6 +32,13 @@ const App = () => (
             <ProtectedRoute>
               <Layout>
                 <Creators />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/subscriptions" element={
+            <ProtectedRoute>
+              <Layout>
+                <Subscriptions />
               </Layout>
             </ProtectedRoute>
           } />
