@@ -49,10 +49,18 @@ const Creators = () => {
           )}
         >
           <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-              <h1 className="text-3xl font-bold text-foreground">Créateurs</h1>
-              <div className="w-full sm:w-auto">
-                <CreateCreatorDialog />
+            {/* Section d'en-tête avec bouton bien visible */}
+            <div className="bg-card rounded-lg border shadow-sm p-6 mb-8">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-foreground mb-2">Créateurs</h1>
+                  <p className="text-muted-foreground">
+                    Gérez la liste des créateurs de votre plateforme YouTube
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  <CreateCreatorDialog />
+                </div>
               </div>
             </div>
             
@@ -70,6 +78,14 @@ const Creators = () => {
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+            ) : creators.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-muted-foreground mb-4">
+                  <p className="text-lg mb-2">Aucun créateur trouvé</p>
+                  <p>Commencez par ajouter votre premier créateur !</p>
+                </div>
+                <CreateCreatorDialog />
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
