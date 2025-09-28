@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { useDownloads } from "@/hooks/useDownloads";
+import { useBackgroundPlayback } from "@/hooks/useBackgroundPlayback";
 import type { VideoWithCreator } from "@/types/database";
 
 const Watch = () => {
@@ -15,6 +16,7 @@ const Watch = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { addDownload, removeDownload, isDownloaded, isAddingDownload, isRemovingDownload } = useDownloads();
+  const { configureVideoForBackground } = useBackgroundPlayback();
 
   const { data: currentVideo, isLoading } = useQuery({
     queryKey: ["video", videoId],
@@ -133,11 +135,16 @@ const Watch = () => {
           {/* Lecteur vidéo principal */}
           <div className={cn(isMobile ? "col-span-1" : "col-span-2")}>
             <div className="space-y-4">
-              {/* Lecteur YouTube */}
+              {/* Lecteur YouTube avec lecture en arrière-plan */}
               {youtubeVideoId ? (
                 <div className="aspect-video w-full">
                   <iframe
-                    src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`}
+                    ref={(iframe) => {
+                      if (iframe) {
+                        configureVideoForBackground(iframe);
+                      }
+                    }}
+                    src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`}
                     title={currentVideo.title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen

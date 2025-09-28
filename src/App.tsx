@@ -13,10 +13,14 @@ import Watch from "./pages/Watch";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { initializeCapacitor } from "./utils/capacitor-init";
+import { useBackgroundPlayback } from "./hooks/useBackgroundPlayback";
 
 const queryClient = new QueryClient();
 
 const App = () => {
+  // Initialize background playback globally
+  useBackgroundPlayback();
+
   // Initialize Capacitor after React is ready
   React.useEffect(() => {
     initializeCapacitor();

@@ -24,6 +24,41 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://www.youtube.com" />
 
+    <!-- Configuration pour lecture en arrière-plan -->
+    <script>
+      // Enregistrer le service worker pour la lecture en arrière-plan
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/background-service-worker.js')
+            .then(function(registration) {
+              console.log('Service Worker enregistré pour la lecture en arrière-plan');
+            })
+            .catch(function(error) {
+              console.log('Erreur Service Worker:', error);
+            });
+        });
+      }
+      
+      // Empêcher la suspension des vidéos
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+          console.log('Page cachée - maintien des vidéos actives');
+          // Maintenir l'audio/vidéo actif
+          const videos = document.querySelectorAll('iframe[src*="youtube"], video, audio');
+          videos.forEach(function(media) {
+            if (media.tagName === 'IFRAME') {
+              // Pour YouTube, essayer de maintenir via postMessage si l'API est disponible
+              try {
+                media.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+              } catch(e) {
+                console.log('Impossible de contrôler la vidéo YouTube');
+              }
+            }
+          });
+        }
+      });
+    </script>
+
     <meta property="og:title" content="Mon Petit YouTube - Plateforme Vidéo" />
     <meta property="og:description" content="Une plateforme vidéo moderne inspirée de YouTube avec lecture audio en arrière-plan" />
     <meta property="og:type" content="website" />
