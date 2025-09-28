@@ -7,6 +7,7 @@ import { formatSubscriberCount } from "@/utils/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
+import CreateCreatorDialog from "@/components/CreateCreatorDialog";
 
 const Creators = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -48,7 +49,10 @@ const Creators = () => {
           )}
         >
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8 text-foreground">Créateurs</h1>
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl font-bold text-foreground">Créateurs</h1>
+              <CreateCreatorDialog />
+            </div>
             
             {isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
