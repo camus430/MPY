@@ -7,7 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 const Downloads = () => {
-  const { downloads, isLoading, removeDownload } = useDownloads();
+  const { downloads, isLoading, removeDownload, isAuthenticated } = useDownloads();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -31,7 +31,7 @@ const Downloads = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">

@@ -1,3 +1,4 @@
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
@@ -36,12 +37,13 @@ export const useDownloads = () => {
 
   const addDownload = useMutation({
     mutationFn: async (videoId: string) => {
-      if (!user?.id) throw new Error("Utilisateur non connecté");
+      const currentUser = user;
+      if (!currentUser?.id) throw new Error("Utilisateur non connecté");
 
       const { error } = await supabase
         .from("downloads")
         .insert({
-          user_id: user.id,
+          user_id: currentUser.id,
           video_id: videoId,
         });
 
@@ -63,12 +65,13 @@ export const useDownloads = () => {
 
   const removeDownload = useMutation({
     mutationFn: async (videoId: string) => {
-      if (!user?.id) throw new Error("Utilisateur non connecté");
+      const currentUser = user;
+      if (!currentUser?.id) throw new Error("Utilisateur non connecté");
 
       const { error } = await supabase
         .from("downloads")
         .delete()
-        .eq("user_id", user.id)
+        .eq("user_id", currentUser.id)
         .eq("video_id", videoId);
 
       if (error) throw error;
@@ -95,5 +98,6 @@ export const useDownloads = () => {
     isDownloaded,
     isAddingDownload: addDownload.isPending,
     isRemovingDownload: removeDownload.isPending,
+    isAuthenticated: !!user,
   };
 };
