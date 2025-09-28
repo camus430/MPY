@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useVideos } from "@/hooks/useVideos";
 import { formatViewCount, formatTimeAgo } from "@/utils/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Importing generated images to use as fallback thumbnails
 import thumbnailCoding from "@/assets/thumbnail-coding.jpg";
@@ -14,7 +15,8 @@ import thumbnailCooking from "@/assets/thumbnail-cooking.jpg";
 import thumbnailGaming from "@/assets/thumbnail-gaming.jpg";
 
 const Index = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
   const { data: videos = [], isLoading, error } = useVideos();
 
   // Fallback thumbnails mapping
@@ -38,10 +40,10 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         <div className="flex">
-          <Sidebar isOpen={sidebarOpen} />
+          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           <main className={cn(
-            "flex-1 pt-20 p-6 transition-all duration-300",
-            sidebarOpen ? "ml-60" : "ml-20"
+            "flex-1 pt-16 p-3 sm:p-6 transition-all duration-300",
+            !isMobile && sidebarOpen ? "lg:ml-60" : !isMobile ? "lg:ml-20" : "ml-0"
           )}>
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
@@ -60,17 +62,17 @@ const Index = () => {
       <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       
       <div className="flex">
-        <Sidebar isOpen={sidebarOpen} />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         
         <main
           className={cn(
-            "flex-1 pt-20 p-6 transition-all duration-300",
-            sidebarOpen ? "ml-60" : "ml-20"
+            "flex-1 pt-16 p-3 sm:p-6 transition-all duration-300",
+            !isMobile && sidebarOpen ? "lg:ml-60" : !isMobile ? "lg:ml-20" : "ml-0"
           )}
         >
           <div className="max-w-[2000px] mx-auto">
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-6">
                 {Array.from({ length: 8 }).map((_, index) => (
                   <div key={index} className="space-y-3">
                     <Skeleton className="aspect-video w-full rounded-lg" />
@@ -86,7 +88,7 @@ const Index = () => {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-6">
                 {videos.map((video, index) => (
                   <VideoCard
                     key={video.id}

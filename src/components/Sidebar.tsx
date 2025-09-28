@@ -2,13 +2,16 @@ import { Home, TrendingUp, Users, Clock, ThumbsUp, PlaySquare, UserCheck } from 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SidebarProps {
   isOpen: boolean;
+  onClose?: () => void;
 }
 
-const Sidebar = ({ isOpen }: SidebarProps) => {
+const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   const menuItems = [
     { icon: Home, label: "Accueil", path: "/" },
@@ -20,10 +23,68 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
     { icon: ThumbsUp, label: "Vidéos likées", path: "#" },
   ];
 
+  const handleItemClick = () => {
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
+  if (isMobile) {
+    return (
+      <>
+        {/* Mobile overlay */}
+        {isOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={onClose}
+          />
+        )}
+        
+        {/* Mobile sidebar */}
+        <aside
+          className={cn(
+            "fixed left-0 top-16 h-[calc(100vh-4rem)] w-72 bg-background border-r border-border transition-transform duration-300 z-50 lg:hidden",
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          <div className="p-4">
+            <nav className="space-y-2">
+              {menuItems.map((item, index) => {
+                const isActive = location.pathname === item.path;
+                const ItemComponent = item.path !== "#" ? Link : "div";
+                
+                return (
+                  <ItemComponent
+                    key={index}
+                    to={item.path !== "#" ? item.path : undefined}
+                    className="block"
+                    onClick={handleItemClick}
+                  >
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full justify-start gap-4 px-4 py-3 h-auto hover:bg-youtube-hover rounded-lg",
+                        isActive && "bg-youtube-hover"
+                      )}
+                    >
+                      <item.icon className="h-6 w-6 flex-shrink-0" />
+                      <span className="text-sm font-medium">{item.label}</span>
+                    </Button>
+                  </ItemComponent>
+                );
+              })}
+            </nav>
+          </div>
+        </aside>
+      </>
+    );
+  }
+
+  // Desktop sidebar
   return (
     <aside
       className={cn(
-        "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border-r border-border transition-all duration-300 z-40",
+        "fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border-r border-border transition-all duration-300 z-40 hidden lg:block",
         isOpen ? "w-60" : "w-20"
       )}
     >
