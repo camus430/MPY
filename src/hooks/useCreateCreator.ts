@@ -12,12 +12,16 @@ const creatorSchema = z.object({
 
 export type CreateCreatorData = z.infer<typeof creatorSchema>;
 
+export interface CreateCreatorWithChannelData extends CreateCreatorData {
+  youtube_channel_id?: string;
+}
+
 export const useCreateCreator = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (data: CreateCreatorData & { channel_id?: string }) => {
+    mutationFn: async (data: CreateCreatorWithChannelData) => {
       // Validate data
       const validatedData = creatorSchema.parse(data);
       
@@ -28,6 +32,7 @@ export const useCreateCreator = () => {
           avatar_url: validatedData.avatar_url || null,
           description: validatedData.description || null,
           subscriber_count: validatedData.subscriber_count || 0,
+          youtube_channel_id: data.youtube_channel_id || null,
         })
         .select()
         .single();
@@ -36,14 +41,14 @@ export const useCreateCreator = () => {
         throw error;
       }
 
-      // If we have a channel_id, fetch and insert videos
-      if (data.channel_id) {
+      // If we have a youtube_channel_id, fetch and insert videos
+      if (data.youtube_channel_id) {
         try {
-          console.log('Fetching videos for channel:', data.channel_id);
+          console.log('Fetching videos for channel:', data.youtube_channel_id);
           await supabase.functions.invoke('get-youtube-videos', {
             body: { 
               creator_id: creator.id, 
-              channel_id: data.channel_id 
+              channel_id: data.youtube_channel_id 
             }
           });
         } catch (videoError) {

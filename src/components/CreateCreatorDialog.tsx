@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Loader2, Youtube } from "lucide-react";
-import { useCreateCreator, type CreateCreatorData } from "@/hooks/useCreateCreator";
+import { useCreateCreator, type CreateCreatorWithChannelData } from "@/hooks/useCreateCreator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,7 @@ const CreateCreatorDialog = ({ variant = "default" }: CreateCreatorDialogProps) 
   const [open, setOpen] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [isLoadingYoutube, setIsLoadingYoutube] = useState(false);
-  const [creatorData, setCreatorData] = useState<CreateCreatorData & { channel_id?: string } | null>(null);
+  const [creatorData, setCreatorData] = useState<CreateCreatorWithChannelData | null>(null);
 
   const createCreator = useCreateCreator();
   const { toast } = useToast();
@@ -60,7 +60,7 @@ const CreateCreatorDialog = ({ variant = "default" }: CreateCreatorDialogProps) 
         avatar_url: data.avatar_url,
         description: data.description,
         subscriber_count: data.subscriber_count,
-        channel_id: data.channel_id,
+        youtube_channel_id: data.channel_id,
       });
 
       toast({
