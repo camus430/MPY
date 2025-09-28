@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { useDownloads } from "@/hooks/useDownloads";
+import BackgroundAudioPlayer from "@/components/BackgroundAudioPlayer";
 import type { VideoWithCreator } from "@/types/database";
 
 const Watch = () => {
@@ -106,6 +107,15 @@ const Watch = () => {
   }
 
   const youtubeVideoId = getYouTubeVideoId(currentVideo.thumbnail_url);
+
+  // Prepare audio player data
+  const audioPlayerData = currentVideo ? {
+    title: currentVideo.title,
+    creator: currentVideo.creator.name,
+    thumbnail: currentVideo.thumbnail_url,
+    youtubeId: youtubeVideoId || '',
+    duration: currentVideo.duration,
+  } : undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -225,6 +235,9 @@ const Watch = () => {
           </div>
         </div>
       </div>
+
+      {/* Background Audio Player */}
+      <BackgroundAudioPlayer videoData={audioPlayerData} />
     </div>
   );
 };
