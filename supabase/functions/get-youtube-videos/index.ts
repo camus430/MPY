@@ -38,48 +38,74 @@ async function getChannelVideos(channelId: string): Promise<YouTubeVideo[]> {
     throw new Error('YouTube API key not configured');
   }
 
-  console.log('Fetching videos for channel:', channelId);
+  console.log('Fetching ALL videos for channel:', channelId);
   
-  // Get recent videos from the channel
-  const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=10&order=date&type=video&key=${YOUTUBE_API_KEY}`;
+  let allVideos: YouTubeVideo[] = [];
+  let nextPageToken = '';
+  let totalFetched = 0;
+  const maxResults = 50; // Maximum allowed per request
   
-  const searchResponse = await fetch(searchUrl);
-  const searchData = await searchResponse.json();
-  
-  if (!searchResponse.ok || !searchData.items) {
-    console.error('Search API error:', searchData);
-    throw new Error('Impossible de récupérer les vidéos');
-  }
-
-  console.log(`Found ${searchData.items.length} videos`);
-  
-  // Get video details (duration, view count) for all videos
-  const videoIds = searchData.items.map((item: any) => item.id.videoId).join(',');
-  const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=${videoIds}&key=${YOUTUBE_API_KEY}`;
-  
-  const videosResponse = await fetch(videosUrl);
-  const videosData = await videosResponse.json();
-  
-  if (!videosResponse.ok || !videosData.items) {
-    console.error('Videos API error:', videosData);
-    throw new Error('Impossible de récupérer les détails des vidéos');
-  }
-
-  // Combine search results with video details
-  const videos: YouTubeVideo[] = searchData.items.map((searchItem: any, index: number) => {
-    const videoDetails = videosData.items.find((video: any) => video.id === searchItem.id.videoId);
+  do {
+    // Get videos from the channel with pagination
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=${maxResults}&order=date&type=video&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
     
-    return {
-      id: searchItem.id.videoId,
-      title: searchItem.snippet.title,
-      thumbnail_url: searchItem.snippet.thumbnails?.high?.url || searchItem.snippet.thumbnails?.default?.url || '',
-      duration: formatDuration(videoDetails?.contentDetails?.duration || 'PT0S'),
-      view_count: parseInt(videoDetails?.statistics?.viewCount || '0'),
-      published_at: searchItem.snippet.publishedAt
-    };
-  });
+    console.log(`Fetching page ${Math.floor(totalFetched / maxResults) + 1}...`);
+    
+    const searchResponse = await fetch(searchUrl);
+    const searchData = await searchResponse.json();
+    
+    if (!searchResponse.ok || !searchData.items) {
+      console.error('Search API error:', searchData);
+      throw new Error('Impossible de récupérer les vidéos');
+    }
 
-  return videos;
+    if (searchData.items.length === 0) {
+      break; // No more videos
+    }
+
+    console.log(`Found ${searchData.items.length} videos on this page`);
+    
+    // Get video details (duration, view count) for this batch
+    const videoIds = searchData.items.map((item: any) => item.id.videoId).join(',');
+    const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=${videoIds}&key=${YOUTUBE_API_KEY}`;
+    
+    const videosResponse = await fetch(videosUrl);
+    const videosData = await videosResponse.json();
+    
+    if (!videosResponse.ok || !videosData.items) {
+      console.error('Videos API error:', videosData);
+      throw new Error('Impossible de récupérer les détails des vidéos');
+    }
+
+    // Combine search results with video details for this batch
+    const batchVideos: YouTubeVideo[] = searchData.items.map((searchItem: any) => {
+      const videoDetails = videosData.items.find((video: any) => video.id === searchItem.id.videoId);
+      
+      return {
+        id: searchItem.id.videoId,
+        title: searchItem.snippet.title,
+        thumbnail_url: searchItem.snippet.thumbnails?.high?.url || searchItem.snippet.thumbnails?.default?.url || '',
+        duration: formatDuration(videoDetails?.contentDetails?.duration || 'PT0S'),
+        view_count: parseInt(videoDetails?.statistics?.viewCount || '0'),
+        published_at: searchItem.snippet.publishedAt
+      };
+    });
+
+    allVideos = allVideos.concat(batchVideos);
+    totalFetched += searchData.items.length;
+    nextPageToken = searchData.nextPageToken || '';
+    
+    console.log(`Total videos fetched so far: ${totalFetched}`);
+    
+    // Add a small delay to avoid hitting rate limits
+    if (nextPageToken) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+  } while (nextPageToken && totalFetched < 1000); // Limit to 1000 videos max to avoid timeouts
+
+  console.log(`Finished fetching. Total videos found: ${allVideos.length}`);
+  return allVideos;
 }
 
 serve(async (req) => {
