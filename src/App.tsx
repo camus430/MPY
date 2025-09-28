@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "@/components/Layout";
 import Index from "./pages/Index";
 import Creators from "./pages/Creators";
+import Downloads from "./pages/Downloads";
 import Auth from "./pages/Auth";
 import Watch from "./pages/Watch";
 import NotFound from "./pages/NotFound";
@@ -32,6 +33,13 @@ const App = () => (
             <ProtectedRoute>
               <Layout>
                 <Creators />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/downloads" element={
+            <ProtectedRoute>
+              <Layout>
+                <Downloads />
               </Layout>
             </ProtectedRoute>
           } />

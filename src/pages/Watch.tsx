@@ -2,17 +2,19 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, DownloadIcon } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { useDownloads } from "@/hooks/useDownloads";
 import type { VideoWithCreator } from "@/types/database";
 
 const Watch = () => {
   const { videoId } = useParams();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { addDownload, removeDownload, isDownloaded, isAddingDownload, isRemovingDownload } = useDownloads();
 
   const { data: currentVideo, isLoading } = useQuery({
     queryKey: ["video", videoId],
@@ -145,20 +147,39 @@ const Watch = () => {
                   {currentVideo.title}
                 </h1>
                 
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={currentVideo.creator.avatar_url} alt={currentVideo.creator.name} />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {currentVideo.creator.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div>
-                    <p className="font-medium text-foreground">{currentVideo.creator.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatViews(currentVideo.view_count)}
-                    </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={currentVideo.creator.avatar_url} alt={currentVideo.creator.name} />
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {currentVideo.creator.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div>
+                      <p className="font-medium text-foreground">{currentVideo.creator.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatViews(currentVideo.view_count)}
+                      </p>
+                    </div>
                   </div>
+
+                  <Button
+                    onClick={() => {
+                      if (isDownloaded(currentVideo.id)) {
+                        removeDownload(currentVideo.id);
+                      } else {
+                        addDownload(currentVideo.id);
+                      }
+                    }}
+                    variant={isDownloaded(currentVideo.id) ? "default" : "outline"}
+                    size="sm"
+                    disabled={isAddingDownload || isRemovingDownload}
+                    className="gap-2"
+                  >
+                    <DownloadIcon className="h-4 w-4" />
+                    {isDownloaded(currentVideo.id) ? "Sauvegardé" : "Sauvegarder"}
+                  </Button>
                 </div>
               </div>
             </div>

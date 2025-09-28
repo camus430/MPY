@@ -1,10 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Download, DownloadIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
+import { useDownloads } from "@/hooks/useDownloads";
 
 interface VideoCardProps {
   id: string;
@@ -16,6 +17,7 @@ interface VideoCardProps {
   duration: string;
   channelAvatar?: string;
   onDelete?: (id: string) => void;
+  showDownloadButton?: boolean;
 }
 
 const VideoCard = ({
@@ -28,9 +30,13 @@ const VideoCard = ({
   duration,
   channelAvatar,
   onDelete,
+  showDownloadButton = true,
 }: VideoCardProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const { addDownload, removeDownload, isDownloaded, isAddingDownload, isRemovingDownload } = useDownloads();
+
+  const downloaded = isDownloaded(id);
   
   return (
     <Card 
@@ -50,19 +56,39 @@ const VideoCard = ({
               {duration}
             </div>
           )}
-          {onDelete && (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(id);
-              }}
-              size="icon"
-              variant="destructive"
-              className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
+          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            {showDownloadButton && (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (downloaded) {
+                    removeDownload(id);
+                  } else {
+                    addDownload(id);
+                  }
+                }}
+                size="icon"
+                variant={downloaded ? "default" : "secondary"}
+                className="h-8 w-8"
+                disabled={isAddingDownload || isRemovingDownload}
+              >
+                <DownloadIcon className="h-4 w-4" />
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(id);
+                }}
+                size="icon"
+                variant="destructive"
+                className="h-8 w-8"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Video info */}

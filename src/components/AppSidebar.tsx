@@ -1,4 +1,4 @@
-import { Home, TrendingUp, Users, Clock, ThumbsUp, PlaySquare, UserCheck, ChevronDown } from "lucide-react";
+import { Home, TrendingUp, Users, Clock, ThumbsUp, PlaySquare, UserCheck, ChevronDown, Download } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -22,6 +22,7 @@ const menuItems = [
   { icon: PlaySquare, label: "Bibliothèque", path: "#" },
   { icon: Clock, label: "Historique", path: "#" },
   { icon: ThumbsUp, label: "Vidéos likées", path: "#" },
+  { icon: Download, label: "Téléchargements", path: "/downloads" },
 ];
 
 export function AppSidebar() {
