@@ -40,38 +40,50 @@ async function getChannelVideos(channelId: string): Promise<YouTubeVideo[]> {
 
   console.log('Fetching ALL videos for channel:', channelId);
   
+  // First, get the channel's uploads playlist ID
+  const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}&key=${YOUTUBE_API_KEY}`;
+  const channelResponse = await fetch(channelUrl);
+  const channelData = await channelResponse.json();
+  
+  if (!channelResponse.ok || !channelData.items || channelData.items.length === 0) {
+    console.error('Channel API error:', channelData);
+    throw new Error('Impossible de récupérer les informations du channel');
+  }
+  
+  const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
+  console.log('Found uploads playlist ID:', uploadsPlaylistId);
+  
   let allVideos: YouTubeVideo[] = [];
   let nextPageToken = '';
   let totalFetched = 0;
   const maxResults = 50; // Maximum allowed per request
   
   do {
-    // Get videos from the channel with pagination
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=${maxResults}&order=date&type=video&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
+    // Get videos from the uploads playlist with pagination
+    const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=${maxResults}&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
     
     console.log(`Fetching page ${Math.floor(totalFetched / maxResults) + 1}... (nextPageToken: ${nextPageToken || 'none'})`);
     
-    const searchResponse = await fetch(searchUrl);
-    const searchData = await searchResponse.json();
+    const playlistResponse = await fetch(playlistUrl);
+    const playlistData = await playlistResponse.json();
     
-    console.log(`API Response status: ${searchResponse.status}`);
-    console.log(`API Response data:`, JSON.stringify(searchData, null, 2));
+    console.log(`API Response status: ${playlistResponse.status}`);
     
-    if (!searchResponse.ok || !searchData.items) {
-      console.error('Search API error:', searchData);
-      throw new Error('Impossible de récupérer les vidéos');
+    if (!playlistResponse.ok || !playlistData.items) {
+      console.error('Playlist API error:', playlistData);
+      throw new Error('Impossible de récupérer les vidéos de la playlist');
     }
 
-    if (searchData.items.length === 0) {
+    if (playlistData.items.length === 0) {
       console.log('No more videos found, breaking pagination loop');
       break; // No more videos
     }
 
-    console.log(`Found ${searchData.items.length} videos on this page`);
-    console.log(`Page info - Total results: ${searchData.pageInfo?.totalResults || 'unknown'}, Results per page: ${searchData.pageInfo?.resultsPerPage || 'unknown'}`);
+    console.log(`Found ${playlistData.items.length} videos on this page`);
+    console.log(`Page info - Total results: ${playlistData.pageInfo?.totalResults || 'unknown'}, Results per page: ${playlistData.pageInfo?.resultsPerPage || 'unknown'}`);
     
     // Get video details (duration, view count) for this batch
-    const videoIds = searchData.items.map((item: any) => item.id.videoId).join(',');
+    const videoIds = playlistData.items.map((item: any) => item.snippet.resourceId.videoId).join(',');
     const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=${videoIds}&key=${YOUTUBE_API_KEY}`;
     
     const videosResponse = await fetch(videosUrl);
@@ -82,23 +94,23 @@ async function getChannelVideos(channelId: string): Promise<YouTubeVideo[]> {
       throw new Error('Impossible de récupérer les détails des vidéos');
     }
 
-    // Combine search results with video details for this batch
-    const batchVideos: YouTubeVideo[] = searchData.items.map((searchItem: any) => {
-      const videoDetails = videosData.items.find((video: any) => video.id === searchItem.id.videoId);
+    // Combine playlist results with video details for this batch
+    const batchVideos: YouTubeVideo[] = playlistData.items.map((playlistItem: any) => {
+      const videoDetails = videosData.items.find((video: any) => video.id === playlistItem.snippet.resourceId.videoId);
       
       return {
-        id: searchItem.id.videoId,
-        title: searchItem.snippet.title,
-        thumbnail_url: searchItem.snippet.thumbnails?.high?.url || searchItem.snippet.thumbnails?.default?.url || '',
+        id: playlistItem.snippet.resourceId.videoId,
+        title: playlistItem.snippet.title,
+        thumbnail_url: playlistItem.snippet.thumbnails?.high?.url || playlistItem.snippet.thumbnails?.default?.url || '',
         duration: formatDuration(videoDetails?.contentDetails?.duration || 'PT0S'),
         view_count: parseInt(videoDetails?.statistics?.viewCount || '0'),
-        published_at: searchItem.snippet.publishedAt
+        published_at: playlistItem.snippet.publishedAt
       };
     });
 
     allVideos = allVideos.concat(batchVideos);
-    totalFetched += searchData.items.length;
-    nextPageToken = searchData.nextPageToken || '';
+    totalFetched += playlistData.items.length;
+    nextPageToken = playlistData.nextPageToken || '';
     
     console.log(`Total videos fetched so far: ${totalFetched}`);
     console.log(`Next page token: ${nextPageToken || 'none'}`);
@@ -111,7 +123,7 @@ async function getChannelVideos(channelId: string): Promise<YouTubeVideo[]> {
       console.log('No more pages to fetch');
     }
     
-  } while (nextPageToken && totalFetched < 5000); // Increased limit to handle channels with many videos
+  } while (nextPageToken && totalFetched < 10000); // Increased limit significantly
 
   console.log(`Finished fetching. Total videos found: ${allVideos.length}`);
   return allVideos;
