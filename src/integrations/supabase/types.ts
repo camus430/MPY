@@ -23,6 +23,7 @@ export type Database = {
           name: string
           subscriber_count: number | null
           updated_at: string
+          youtube_channel_id: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -32,6 +33,7 @@ export type Database = {
           name: string
           subscriber_count?: number | null
           updated_at?: string
+          youtube_channel_id?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -41,6 +43,7 @@ export type Database = {
           name?: string
           subscriber_count?: number | null
           updated_at?: string
+          youtube_channel_id?: string | null
         }
         Relationships: []
       }
