@@ -1,4 +1,4 @@
-import { Home, Users, UserCheck, ChevronDown, Download } from "lucide-react";
+import { Home, Users, UserCheck, ChevronDown } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -18,7 +18,6 @@ import { useState } from "react";
 
 const menuItems = [
   { icon: Home, label: "Accueil", path: "/" },
-  { icon: Download, label: "Téléchargements", path: "/downloads" },
 ];
 
 export function AppSidebar() {
