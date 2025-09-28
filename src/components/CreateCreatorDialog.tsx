@@ -53,8 +53,8 @@ const CreateCreatorDialog = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
+        <Button size="lg" className="gap-2 font-semibold px-6 py-3 shadow-lg hover:shadow-xl transition-all bg-primary hover:bg-primary/90">
+          <Plus className="h-5 w-5" />
           Ajouter un créateur
         </Button>
       </DialogTrigger>
