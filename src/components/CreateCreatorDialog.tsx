@@ -15,8 +15,13 @@ import { Plus, Loader2, Youtube } from "lucide-react";
 import { useCreateCreator, type CreateCreatorData } from "@/hooks/useCreateCreator";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
-const CreateCreatorDialog = () => {
+interface CreateCreatorDialogProps {
+  variant?: "default" | "floating";
+}
+
+const CreateCreatorDialog = ({ variant = "default" }: CreateCreatorDialogProps) => {
   const [open, setOpen] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [isLoadingYoutube, setIsLoadingYoutube] = useState(false);
@@ -102,19 +107,40 @@ const CreateCreatorDialog = () => {
     setCreatorData(null);
   };
 
+  const renderTriggerButton = () => {
+    if (variant === "floating") {
+      return (
+        <Button 
+          size="icon"
+          className={cn(
+            "fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300",
+            "bg-red-600 hover:bg-red-700 text-white border-0",
+            "hover:scale-110 active:scale-95"
+          )}
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      );
+    }
+    
+    return (
+      <Button 
+        size="lg" 
+        className="gap-2 font-semibold px-8 py-4 text-base shadow-lg hover:shadow-xl transition-all bg-red-600 hover:bg-red-700 text-white border-0 rounded-lg"
+      >
+        <Plus className="h-5 w-5" />
+        Ajouter un créateur
+      </Button>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={(newOpen) => {
       setOpen(newOpen);
       if (!newOpen) resetForm();
     }}>
       <DialogTrigger asChild>
-        <Button 
-          size="lg" 
-          className="gap-2 font-semibold px-8 py-4 text-base shadow-lg hover:shadow-xl transition-all bg-red-600 hover:bg-red-700 text-white border-0 rounded-lg"
-        >
-          <Plus className="h-5 w-5" />
-          Ajouter un créateur
-        </Button>
+        {renderTriggerButton()}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>

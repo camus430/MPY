@@ -60,9 +60,6 @@ const Creators = () => {
                     Gérez la liste des créateurs de votre plateforme YouTube
                   </p>
                 </div>
-                <div className="flex-shrink-0 w-full sm:w-auto">
-                  <CreateCreatorDialog />
-                </div>
               </div>
             </div>
             
@@ -85,9 +82,8 @@ const Creators = () => {
               <div className="text-center py-12">
                 <div className="text-muted-foreground mb-4">
                   <p className="text-lg mb-2">Aucun créateur trouvé</p>
-                  <p>Commencez par ajouter votre premier créateur !</p>
+                  <p>Commencez par ajouter votre premier créateur avec le bouton + en bas !</p>
                 </div>
-                <CreateCreatorDialog />
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
@@ -127,6 +123,9 @@ const Creators = () => {
           </div>
         </main>
       </div>
+      
+      {/* Floating Action Button */}
+      <CreateCreatorDialog variant="floating" />
     </div>
   );
 };
