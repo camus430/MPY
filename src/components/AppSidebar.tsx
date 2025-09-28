@@ -77,10 +77,10 @@ export function AppSidebar() {
           <Collapsible open={subscriptionsOpen} onOpenChange={setSubscriptionsOpen}>
             <SidebarGroup>
               <CollapsibleTrigger asChild>
-                <SidebarGroupLabel className="cursor-pointer hover:bg-muted/50 rounded-md p-2 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Abonnements
+                <SidebarGroupLabel className="cursor-pointer hover:bg-muted/50 rounded-md p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Users className="h-5 w-5" />
+                    <span className="font-medium">Abonnements</span>
                   </div>
                   <ChevronDown className={`h-4 w-4 transition-transform ${subscriptionsOpen ? 'rotate-180' : ''}`} />
                 </SidebarGroupLabel>
@@ -95,19 +95,19 @@ export function AppSidebar() {
                         </div>
                       </SidebarMenuItem>
                     ) : (
-                      creators.map((creator) => (
-                        <SidebarMenuItem key={creator.id}>
+                      creators.map((creator, index) => (
+                        <SidebarMenuItem key={`creator-${creator.id}-${index}`}>
                           <SidebarMenuButton 
                             onClick={() => handleCreatorClick(creator.id, creator.name)}
-                            className="cursor-pointer hover:bg-muted/50"
+                            className="cursor-pointer hover:bg-muted/50 p-3"
                           >
-                            <Avatar className="h-5 w-5">
+                            <Avatar className="h-6 w-6 flex-shrink-0">
                               <AvatarImage src={creator.avatar_url || ''} alt={creator.name} />
-                              <AvatarFallback className="text-xs">
+                              <AvatarFallback className="text-xs bg-primary/10 text-primary">
                                 {creator.name.charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="truncate">{creator.name}</span>
+                            <span className="truncate text-sm font-medium ml-1">{creator.name}</span>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       ))

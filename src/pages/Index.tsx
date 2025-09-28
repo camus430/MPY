@@ -75,22 +75,22 @@ const Index = () => {
   }
 
   return (
-    <div className="container py-8">
+    <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-8">
       <div className="w-full max-w-[1400px] mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
               {creatorNameFilter ? `Vidéos de ${creatorNameFilter}` : 'Toutes les vidéos'}
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {filteredVideos.length} vidéo{filteredVideos.length !== 1 ? 's' : ''} trouvée{filteredVideos.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {creatorIdFilter && (
-              <Badge variant="secondary" className="flex items-center gap-2">
+              <Badge variant="secondary" className="flex items-center gap-2 text-xs">
                 <Filter className="h-3 w-3" />
-                {creatorNameFilter}
+                <span className="max-w-[120px] truncate">{creatorNameFilter}</span>
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -101,59 +101,59 @@ const Index = () => {
                 </Button>
               </Badge>
             )}
-            <Button onClick={handleRefresh} variant="outline" size="sm">
-              <RefreshCw className="h-4 w-4 mr-2" />
+            <Button onClick={handleRefresh} variant="outline" size="sm" className="text-xs">
+              <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Actualiser
             </Button>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-6">
             {Array.from({ length: 10 }).map((_, index) => (
-              <div key={index} className="space-y-4">
+              <div key={index} className="space-y-3 sm:space-y-4">
                 <Skeleton className="aspect-video w-full rounded-xl" />
-                <div className="flex gap-3">
-                  <Skeleton className="h-9 w-9 rounded-full flex-shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
+                <div className="flex gap-2 sm:gap-3">
+                  <Skeleton className="h-7 w-7 sm:h-9 sm:w-9 rounded-full flex-shrink-0" />
+                  <div className="flex-1 space-y-1 sm:space-y-2">
+                    <Skeleton className="h-3 sm:h-4 w-full" />
+                    <Skeleton className="h-2 sm:h-3 w-3/4" />
+                    <Skeleton className="h-2 sm:h-3 w-1/2" />
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : filteredVideos.length === 0 ? (
-          <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="flex items-center justify-center min-h-[50vh] px-4">
             <div className="text-center">
-              <h2 className="text-xl font-semibold mb-2">
+              <h2 className="text-lg sm:text-xl font-semibold mb-2">
                 {creatorNameFilter 
                   ? `Aucune vidéo de ${creatorNameFilter}` 
                   : 'Aucune vidéo trouvée'
                 }
               </h2>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-sm text-muted-foreground mb-4 max-w-md">
                 {creatorNameFilter 
                   ? 'Ce créateur n\'a pas encore de vidéos synchronisées'
                   : 'Ajoutez des créateurs pour voir leurs vidéos apparaître ici'
                 }
               </p>
-              <div className="flex gap-2 justify-center">
+              <div className="flex flex-col sm:flex-row gap-2 justify-center">
                 {creatorIdFilter && (
-                  <Button onClick={clearFilter} variant="outline">
+                  <Button onClick={clearFilter} variant="outline" size="sm">
                     Voir toutes les vidéos
                   </Button>
                 )}
-                <Button onClick={handleRefresh} variant="outline">
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                <Button onClick={handleRefresh} variant="outline" size="sm">
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                   Actualiser
                 </Button>
               </div>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-6 justify-items-center">
             {filteredVideos.map((video, index) => (
               <div key={video.id} className="w-full max-w-sm">
                 <VideoCard

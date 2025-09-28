@@ -32,7 +32,7 @@ const VideoCard = ({
   
   return (
     <Card className="group cursor-pointer border-0 bg-transparent shadow-none hover:shadow-none">
-      <div className="space-y-3">
+      <div className={cn("space-y-2", isMobile ? "space-y-2" : "space-y-3")}>
         {/* Thumbnail */}
         <div className="relative aspect-video overflow-hidden rounded-xl bg-muted">
           <img
@@ -61,10 +61,10 @@ const VideoCard = ({
         </div>
 
         {/* Video info */}
-        <div className="flex gap-3">
+        <div className={cn("flex", isMobile ? "gap-2" : "gap-3")}>
           <Avatar className={cn(
             "flex-shrink-0 transition-transform duration-200 group-hover:scale-110",
-            isMobile ? "h-8 w-8" : "h-9 w-9"
+            isMobile ? "h-7 w-7" : "h-9 w-9"
           )}>
             <AvatarImage src={channelAvatar} alt={channel} />
             <AvatarFallback className="text-xs bg-primary text-primary-foreground font-medium">
