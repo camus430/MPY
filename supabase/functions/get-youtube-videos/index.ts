@@ -49,10 +49,13 @@ async function getChannelVideos(channelId: string): Promise<YouTubeVideo[]> {
     // Get videos from the channel with pagination
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&maxResults=${maxResults}&order=date&type=video&key=${YOUTUBE_API_KEY}${nextPageToken ? `&pageToken=${nextPageToken}` : ''}`;
     
-    console.log(`Fetching page ${Math.floor(totalFetched / maxResults) + 1}...`);
+    console.log(`Fetching page ${Math.floor(totalFetched / maxResults) + 1}... (nextPageToken: ${nextPageToken || 'none'})`);
     
     const searchResponse = await fetch(searchUrl);
     const searchData = await searchResponse.json();
+    
+    console.log(`API Response status: ${searchResponse.status}`);
+    console.log(`API Response data:`, JSON.stringify(searchData, null, 2));
     
     if (!searchResponse.ok || !searchData.items) {
       console.error('Search API error:', searchData);
@@ -60,10 +63,12 @@ async function getChannelVideos(channelId: string): Promise<YouTubeVideo[]> {
     }
 
     if (searchData.items.length === 0) {
+      console.log('No more videos found, breaking pagination loop');
       break; // No more videos
     }
 
     console.log(`Found ${searchData.items.length} videos on this page`);
+    console.log(`Page info - Total results: ${searchData.pageInfo?.totalResults || 'unknown'}, Results per page: ${searchData.pageInfo?.resultsPerPage || 'unknown'}`);
     
     // Get video details (duration, view count) for this batch
     const videoIds = searchData.items.map((item: any) => item.id.videoId).join(',');
@@ -96,13 +101,17 @@ async function getChannelVideos(channelId: string): Promise<YouTubeVideo[]> {
     nextPageToken = searchData.nextPageToken || '';
     
     console.log(`Total videos fetched so far: ${totalFetched}`);
+    console.log(`Next page token: ${nextPageToken || 'none'}`);
     
     // Add a small delay to avoid hitting rate limits
     if (nextPageToken) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log(`Continuing to next page after delay...`);
+      await new Promise(resolve => setTimeout(resolve, 200));
+    } else {
+      console.log('No more pages to fetch');
     }
     
-  } while (nextPageToken && totalFetched < 1000); // Limit to 1000 videos max to avoid timeouts
+  } while (nextPageToken && totalFetched < 5000); // Increased limit to handle channels with many videos
 
   console.log(`Finished fetching. Total videos found: ${allVideos.length}`);
   return allVideos;
