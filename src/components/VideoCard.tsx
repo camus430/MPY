@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 
 interface VideoCardProps {
   id: string;
@@ -29,9 +30,13 @@ const VideoCard = ({
   onDelete,
 }: VideoCardProps) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   return (
-    <Card className="group cursor-pointer border-0 bg-transparent shadow-none hover:shadow-none">
+    <Card 
+      className="group cursor-pointer border-0 bg-transparent shadow-none hover:shadow-none"
+      onClick={() => navigate(`/watch/${id}`)}
+    >
       <div className={cn("space-y-2", isMobile ? "space-y-2" : "space-y-3")}>
         {/* Thumbnail */}
         <div className="relative aspect-video overflow-hidden rounded-xl bg-muted">

@@ -7,6 +7,7 @@ import Layout from "@/components/Layout";
 import Index from "./pages/Index";
 import Creators from "./pages/Creators";
 import Auth from "./pages/Auth";
+import Watch from "./pages/Watch";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -32,6 +33,11 @@ const App = () => (
               <Layout>
                 <Creators />
               </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/watch/:videoId" element={
+            <ProtectedRoute>
+              <Watch />
             </ProtectedRoute>
           } />
           <Route path="*" element={<NotFound />} />
