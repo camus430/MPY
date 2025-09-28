@@ -8,7 +8,7 @@ import Layout from "@/components/Layout";
 import Index from "./pages/Index";
 import Creators from "./pages/Creators";
 import Downloads from "./pages/Downloads";
-import AddMedia from "./pages/AddMedia";
+
 import Auth from "./pages/Auth";
 import Watch from "./pages/Watch";
 import NotFound from "./pages/NotFound";
@@ -54,11 +54,6 @@ const App = () => {
               <Layout>
                 <Downloads />
               </Layout>
-            </ProtectedRoute>
-          } />
-          <Route path="/add-media" element={
-            <ProtectedRoute>
-              <AddMedia />
             </ProtectedRoute>
           } />
           <Route path="/watch/:videoId" element={
