@@ -1,9 +1,9 @@
 export interface Creator {
   id: string;
   name: string;
-  avatar_url?: string;
+  avatar_url: string | null;
   subscriber_count: number;
-  description?: string;
+  description: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -17,7 +17,7 @@ export interface Video {
   creator_id: string;
   created_at: string;
   updated_at: string;
-  creator?: Creator;
+  creator?: Creator; // Pour les jointures
 }
 
 export interface VideoWithCreator extends Video {

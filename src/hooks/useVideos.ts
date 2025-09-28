@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { VideoWithCreator } from "@/types/database";
+import type { VideoWithCreator } from "@/types/database";
 
 export const useVideos = () => {
   return useQuery({
@@ -15,12 +15,28 @@ export const useVideos = () => {
         .order("created_at", { ascending: false });
 
       if (error) {
-        throw new Error(`Erreur lors du chargement des vidéos: ${error.message}`);
+        throw error;
       }
 
-      return data || [];
+      return data as VideoWithCreator[];
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false,
+  });
+};
+
+export const useCreators = () => {
+  return useQuery({
+    queryKey: ["creators"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("creators")
+        .select("*")
+        .order("name");
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
   });
 };
