@@ -83,7 +83,7 @@ const Index = () => {
               {creatorNameFilter ? `Vidéos de ${creatorNameFilter}` : 'Toutes les vidéos'}
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              {filteredVideos.length} vidéo{filteredVideos.length !== 1 ? 's' : ''} trouvée{filteredVideos.length !== 1 ? 's' : ''}
+              {filteredVideos.length} média{filteredVideos.length !== 1 ? 's' : ''} • Incluant vidéos et audio pour lecture en arrière-plan
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">

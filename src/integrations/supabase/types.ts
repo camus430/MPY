@@ -105,33 +105,45 @@ export type Database = {
       }
       videos: {
         Row: {
+          audio_file_url: string | null
           created_at: string
           creator_id: string
           duration: string
+          file_size: number | null
+          file_type: string | null
           id: string
           thumbnail_url: string
           title: string
           updated_at: string
+          video_file_url: string | null
           view_count: number | null
         }
         Insert: {
+          audio_file_url?: string | null
           created_at?: string
           creator_id: string
           duration: string
+          file_size?: number | null
+          file_type?: string | null
           id?: string
           thumbnail_url: string
           title: string
           updated_at?: string
+          video_file_url?: string | null
           view_count?: number | null
         }
         Update: {
+          audio_file_url?: string | null
           created_at?: string
           creator_id?: string
           duration?: string
+          file_size?: number | null
+          file_type?: string | null
           id?: string
           thumbnail_url?: string
           title?: string
           updated_at?: string
+          video_file_url?: string | null
           view_count?: number | null
         }
         Relationships: [

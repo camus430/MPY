@@ -1,4 +1,4 @@
-import { Home, TrendingUp, Users, Clock, ThumbsUp, PlaySquare, UserCheck, ChevronDown, Download } from "lucide-react";
+import { Home, TrendingUp, Users, Clock, ThumbsUp, PlaySquare, UserCheck, ChevronDown, Download, Plus } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -18,6 +18,7 @@ import { useState } from "react";
 
 const menuItems = [
   { icon: Home, label: "Accueil", path: "/" },
+  { icon: Plus, label: "Ajouter média", path: "/add-media" },
   { icon: TrendingUp, label: "Tendances", path: "#" },
   { icon: PlaySquare, label: "Bibliothèque", path: "#" },
   { icon: Clock, label: "Historique", path: "#" },

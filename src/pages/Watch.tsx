@@ -9,6 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { useDownloads } from "@/hooks/useDownloads";
 import { useBackgroundPlayback } from "@/hooks/useBackgroundPlayback";
+import NativeMediaPlayer from "@/components/NativeMediaPlayer";
 import type { VideoWithCreator } from "@/types/database";
 
 const Watch = () => {
@@ -54,7 +55,7 @@ const Watch = () => {
           creator:creators(*)
         `)
         .eq("creator_id", currentVideo.creator_id)
-        .neq("id", videoId) // Exclure la vidéo actuelle
+        .neq("id", videoId)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -67,11 +68,27 @@ const Watch = () => {
     enabled: !!currentVideo?.creator_id,
   });
 
-  // Extraire l'ID YouTube de l'URL de la miniature
+  // Extraire l'ID YouTube de l'URL de la miniature (legacy)
   const getYouTubeVideoId = (thumbnailUrl: string) => {
     const match = thumbnailUrl.match(/\/vi\/([^\/]+)\//);
     return match ? match[1] : null;
   };
+
+  const youtubeVideoId = currentVideo?.file_type === 'youtube' ? getYouTubeVideoId(currentVideo.thumbnail_url) : null;
+  
+  // Déterminer le type de lecteur à utiliser
+  const getMediaUrl = () => {
+    if (!currentVideo) return null;
+    
+    if (currentVideo.file_type === 'video' && currentVideo.video_file_url) {
+      return currentVideo.video_file_url;
+    } else if (currentVideo.file_type === 'audio' && currentVideo.audio_file_url) {
+      return currentVideo.audio_file_url;
+    }
+    return null;
+  };
+
+  const mediaUrl = getMediaUrl();
 
   const formatViews = (count: number) => {
     if (count >= 1000000) {
@@ -107,17 +124,6 @@ const Watch = () => {
     );
   }
 
-  const youtubeVideoId = getYouTubeVideoId(currentVideo.thumbnail_url);
-
-  // Prepare audio player data
-  const audioPlayerData = currentVideo ? {
-    title: currentVideo.title,
-    creator: currentVideo.creator.name,
-    thumbnail: currentVideo.thumbnail_url,
-    youtubeId: youtubeVideoId || '',
-    duration: currentVideo.duration,
-  } : undefined;
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6">
@@ -132,11 +138,20 @@ const Watch = () => {
           "grid gap-6",
           isMobile ? "grid-cols-1" : "grid-cols-3"
         )}>
-          {/* Lecteur vidéo principal */}
+          {/* Lecteur média principal */}
           <div className={cn(isMobile ? "col-span-1" : "col-span-2")}>
             <div className="space-y-4">
-              {/* Lecteur YouTube avec lecture en arrière-plan */}
-              {youtubeVideoId ? (
+              {/* Lecteur natif pour fichiers locaux ou YouTube pour legacy */}
+              {mediaUrl ? (
+                <NativeMediaPlayer
+                  src={mediaUrl}
+                  title={currentVideo.title}
+                  artist={currentVideo.creator.name}
+                  thumbnail={currentVideo.thumbnail_url}
+                  type={currentVideo.file_type === 'video' ? 'video' : 'audio'}
+                  autoplay={true}
+                />
+              ) : youtubeVideoId ? (
                 <div className="aspect-video w-full">
                   <iframe
                     ref={(iframe) => {
@@ -153,7 +168,7 @@ const Watch = () => {
                 </div>
               ) : (
                 <div className="aspect-video w-full bg-muted rounded-lg flex items-center justify-center">
-                  <p className="text-muted-foreground">Impossible de charger la vidéo</p>
+                  <p className="text-muted-foreground">Impossible de charger le média</p>
                 </div>
               )}
 
@@ -176,6 +191,9 @@ const Watch = () => {
                       <p className="font-medium text-foreground">{currentVideo.creator.name}</p>
                       <p className="text-sm text-muted-foreground">
                         {formatViews(currentVideo.view_count)}
+                        {currentVideo.file_size && (
+                          <span> • {(currentVideo.file_size / (1024 * 1024)).toFixed(1)} MB</span>
+                        )}
                       </p>
                     </div>
                   </div>

@@ -17,6 +17,11 @@ export interface Video {
   creator_id: string;
   created_at: string;
   updated_at: string;
+  // Nouveaux champs pour les fichiers locaux
+  video_file_url?: string | null;
+  audio_file_url?: string | null;
+  file_type?: 'youtube' | 'video' | 'audio';
+  file_size?: number | null;
   creator?: Creator; // Pour les jointures
 }
 
