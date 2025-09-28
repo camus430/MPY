@@ -44,7 +44,7 @@ const Index = () => {
         <div className="flex">
           <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
            <main className={cn(
-             "flex-1 pt-20 p-3 sm:p-6 transition-all duration-300",
+             "flex-1 pt-[250px] p-3 sm:p-6 transition-all duration-300",
              !isMobile && sidebarOpen ? "lg:ml-60" : !isMobile ? "lg:ml-20" : "ml-0"
            )}>
             <div className="flex items-center justify-center h-64">
@@ -68,7 +68,7 @@ const Index = () => {
         
         <main
           className={cn(
-            "flex-1 pt-20 p-3 sm:p-6 transition-all duration-300",
+            "flex-1 pt-[250px] p-3 sm:p-6 transition-all duration-300",
             !isMobile && sidebarOpen ? "lg:ml-60" : !isMobile ? "lg:ml-20" : "ml-0"
           )}
         >
