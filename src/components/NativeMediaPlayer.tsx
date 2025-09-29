@@ -317,8 +317,9 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
               variant={isLooping ? "default" : "ghost"}
               onClick={toggleLoop}
               title={isLooping ? "Désactiver la boucle" : "Activer la boucle"}
+              className={cn(isLooping && "bg-primary text-primary-foreground hover:bg-primary/90")}
             >
-              <RotateCcw className={cn("h-4 w-4", isLooping && "text-primary-foreground")} />
+              <RotateCcw className="h-4 w-4" />
             </Button>
 
             {!isMobile && (
@@ -342,6 +343,20 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
                   className="w-20"
                 />
               </div>
+            )}
+
+            {isMobile && (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={toggleMute}
+              >
+                {isMuted ? (
+                  <VolumeX className="h-4 w-4" />
+                ) : (
+                  <Volume2 className="h-4 w-4" />
+                )}
+              </Button>
             )}
           </div>
 
