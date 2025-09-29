@@ -1,13 +1,15 @@
-import { Video, Bell, User, LogOut } from "lucide-react";
+import { Video, Bell, User, LogOut, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import SearchInput from "@/components/SearchInput";
+import SearchDialog from "@/components/SearchDialog";
+import { useState } from "react";
 
 const AppHeader = () => {
   const isMobile = useIsMobile();
   const { user, signOut } = useAuth();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -27,9 +29,16 @@ const AppHeader = () => {
           </div>
         </div>
 
-        {/* Center section - Search */}
-        <div className="flex-1 max-w-2xl mx-8">
-          <SearchInput className="mx-auto" />
+        {/* Center section - Search Button */}
+        <div className="flex-1 flex justify-center">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setSearchOpen(true)}
+            className="rounded-full w-10 h-10 hover:bg-accent"
+          >
+            <Search className="h-5 w-5" />
+          </Button>
         </div>
 
         {/* Right section */}
@@ -50,6 +59,8 @@ const AppHeader = () => {
           </Button>
         </div>
       </div>
+      
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 };

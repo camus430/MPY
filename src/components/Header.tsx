@@ -2,7 +2,8 @@ import { Search, Menu, Video, Bell, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
-import SearchInput from "@/components/SearchInput";
+import SearchDialog from "@/components/SearchDialog";
+import { useState } from "react";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -11,6 +12,7 @@ interface HeaderProps {
 const Header = ({ onMenuClick }: HeaderProps) => {
   const isMobile = useIsMobile();
   const { user, signOut } = useAuth();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -38,10 +40,17 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           </div>
         </div>
 
-        {/* Center section - Search (hidden on mobile) */}
+        {/* Center section - Search Button (hidden on mobile) */}
         {!isMobile && (
-          <div className="flex-1 max-w-2xl mx-8">
-            <SearchInput />
+          <div className="flex-1 flex justify-center">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSearchOpen(true)}
+              className="rounded-full w-10 h-10 hover:bg-accent"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
           </div>
         )}
 
@@ -51,7 +60,8 @@ const Header = ({ onMenuClick }: HeaderProps) => {
             <Button
               variant="ghost"
               size="icon"
-              className="hover:bg-youtube-hover flex-shrink-0"
+              onClick={() => setSearchOpen(true)}
+              className="hover:bg-youtube-hover flex-shrink-0 rounded-full"
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -82,6 +92,8 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           </Button>
         </div>
       </div>
+      
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 };
