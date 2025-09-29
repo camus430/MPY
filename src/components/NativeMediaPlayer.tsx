@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Play, Pause, Volume2, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -32,6 +32,7 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLooping, setIsLooping] = useState(false);
   const isMobile = useIsMobile();
 
   // Configuration pour la lecture en arrière-plan
@@ -113,10 +114,15 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
     };
 
     const handleEnded = () => {
-      setIsPlaying(false);
-      setCurrentTime(0);
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'none';
+      if (isLooping) {
+        media.currentTime = 0;
+        media.play().catch(console.error);
+      } else {
+        setIsPlaying(false);
+        setCurrentTime(0);
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.playbackState = 'none';
+        }
       }
     };
 
@@ -145,7 +151,7 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
       media.removeEventListener('ended', handleEnded);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [src, title, artist, thumbnail, volume, autoplay]);
+  }, [src, title, artist, thumbnail, volume, autoplay, isLooping]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -211,6 +217,10 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
       }
     }
     setIsFullscreen(!isFullscreen);
+  };
+
+  const toggleLoop = () => {
+    setIsLooping(!isLooping);
   };
 
   return (
@@ -300,6 +310,15 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
               ) : (
                 <Play className="h-5 w-5" />
               )}
+            </Button>
+
+            <Button
+              size="icon"
+              variant={isLooping ? "default" : "ghost"}
+              onClick={toggleLoop}
+              title={isLooping ? "Désactiver la boucle" : "Activer la boucle"}
+            >
+              <RotateCcw className={cn("h-4 w-4", isLooping && "text-primary-foreground")} />
             </Button>
 
             {!isMobile && (
