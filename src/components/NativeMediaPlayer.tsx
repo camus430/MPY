@@ -14,6 +14,8 @@ interface NativeMediaPlayerProps {
   type: 'video' | 'audio';
   autoplay?: boolean;
   className?: string;
+  loop?: boolean;
+  onLoopChange?: (loop: boolean) => void;
 }
 
 const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
@@ -23,7 +25,9 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
   thumbnail,
   type,
   autoplay = false,
-  className
+  className,
+  loop = false,
+  onLoopChange
 }) => {
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -32,7 +36,7 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isLooping, setIsLooping] = useState(false);
+  const [isLooping, setIsLooping] = useState(loop);
   const isMobile = useIsMobile();
 
   // Configuration pour la lecture en arrière-plan
@@ -220,7 +224,9 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
   };
 
   const toggleLoop = () => {
-    setIsLooping(!isLooping);
+    const newLooping = !isLooping;
+    setIsLooping(newLooping);
+    onLoopChange?.(newLooping);
   };
 
   return (

@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, DownloadIcon } from "lucide-react";
+import { ArrowLeft, DownloadIcon, RotateCcw } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -11,6 +11,7 @@ import { useDownloads } from "@/hooks/useDownloads";
 import { useBackgroundPlayback } from "@/hooks/useBackgroundPlayback";
 import NativeMediaPlayer from "@/components/NativeMediaPlayer";
 import type { VideoWithCreator } from "@/types/database";
+import { useState } from "react";
 
 const Watch = () => {
   const { videoId } = useParams();
@@ -18,6 +19,7 @@ const Watch = () => {
   const isMobile = useIsMobile();
   const { addDownload, removeDownload, isDownloaded, isAddingDownload, isRemovingDownload } = useDownloads();
   const { configureVideoForBackground } = useBackgroundPlayback();
+  const [isLooping, setIsLooping] = useState(false);
 
   const { data: currentVideo, isLoading } = useQuery({
     queryKey: ["video", videoId],
@@ -150,6 +152,8 @@ const Watch = () => {
                   thumbnail={currentVideo.thumbnail_url}
                   type={currentVideo.file_type === 'video' ? 'video' : 'audio'}
                   autoplay={true}
+                  loop={isLooping}
+                  onLoopChange={setIsLooping}
                 />
               ) : youtubeVideoId ? (
                 <div className="aspect-video w-full">
@@ -159,7 +163,7 @@ const Watch = () => {
                         configureVideoForBackground(iframe);
                       }
                     }}
-                    src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`}
+                    src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1${isLooping ? `&loop=1&playlist=${youtubeVideoId}` : ''}`}
                     title={currentVideo.title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
@@ -198,22 +202,35 @@ const Watch = () => {
                     </div>
                   </div>
 
-                  <Button
-                    onClick={() => {
-                      if (isDownloaded(currentVideo.id)) {
-                        removeDownload(currentVideo.id);
-                      } else {
-                        addDownload(currentVideo.id);
-                      }
-                    }}
-                    variant={isDownloaded(currentVideo.id) ? "default" : "outline"}
-                    size="sm"
-                    disabled={isAddingDownload || isRemovingDownload}
-                    className="gap-2"
-                  >
-                    <DownloadIcon className="h-4 w-4" />
-                    {isDownloaded(currentVideo.id) ? "Sauvegardé" : "Sauvegarder"}
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => setIsLooping(!isLooping)}
+                      variant={isLooping ? "default" : "outline"}
+                      size="sm"
+                      className="gap-2"
+                      title={isLooping ? "Désactiver la boucle" : "Activer la boucle"}
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      {isLooping ? "Boucle ON" : "Boucle"}
+                    </Button>
+                    
+                    <Button
+                      onClick={() => {
+                        if (isDownloaded(currentVideo.id)) {
+                          removeDownload(currentVideo.id);
+                        } else {
+                          addDownload(currentVideo.id);
+                        }
+                      }}
+                      variant={isDownloaded(currentVideo.id) ? "default" : "outline"}
+                      size="sm"
+                      disabled={isAddingDownload || isRemovingDownload}
+                      className="gap-2"
+                    >
+                      <DownloadIcon className="h-4 w-4" />
+                      {isDownloaded(currentVideo.id) ? "Sauvegardé" : "Sauvegarder"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
