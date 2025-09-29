@@ -1,8 +1,8 @@
 import { Search, Menu, Video, Bell, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
+import SearchInput from "@/components/SearchInput";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -41,21 +41,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
         {/* Center section - Search (hidden on mobile) */}
         {!isMobile && (
           <div className="flex-1 max-w-2xl mx-8">
-            <div className="flex">
-              <div className="relative flex-1">
-                <Input
-                  type="text"
-                  placeholder="Rechercher..."
-                  className="w-full pr-4 py-2 rounded-l-full border-r-0 focus:ring-primary"
-                />
-              </div>
-              <Button
-                variant="secondary"
-                className="px-6 rounded-r-full border border-l-0 hover:bg-youtube-light-gray"
-              >
-                <Search className="h-5 w-5" />
-              </Button>
-            </div>
+            <SearchInput />
           </div>
         )}
 

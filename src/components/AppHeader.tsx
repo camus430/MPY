@@ -1,9 +1,9 @@
-import { Search, Video, Bell, User, LogOut } from "lucide-react";
+import { Video, Bell, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import SearchInput from "@/components/SearchInput";
 
 const AppHeader = () => {
   const isMobile = useIsMobile();
@@ -29,20 +29,7 @@ const AppHeader = () => {
 
         {/* Center section - Search */}
         <div className="flex-1 max-w-2xl mx-8">
-          <div className="flex w-full max-w-lg mx-auto">
-            <Input
-              type="search"
-              placeholder="Rechercher..."
-              className="rounded-r-none border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-            <Button
-              type="submit"
-              variant="secondary"
-              className="rounded-l-none border-l-0"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
+          <SearchInput className="mx-auto" />
         </div>
 
         {/* Right section */}

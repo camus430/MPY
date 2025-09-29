@@ -1,14 +1,15 @@
 import VideoCard from "@/components/VideoCard";
 import { useVideos } from "@/hooks/useVideos";
 import { useDeleteVideo } from "@/hooks/useDeleteVideo";
+import { useSearch } from "@/hooks/useSearch";
 import { formatViewCount, formatTimeAgo } from "@/utils/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, X, Filter } from "lucide-react";
+import { RefreshCw, X, Filter, Search } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 
 // Importing generated images to use as fallback thumbnails
 import thumbnailCoding from "@/assets/thumbnail-coding.jpg";
@@ -25,12 +26,36 @@ const Index = () => {
   // Get filter parameters from URL
   const creatorIdFilter = searchParams.get('creator');
   const creatorNameFilter = searchParams.get('name');
+  const searchQuery = searchParams.get('search');
 
   // Filter videos by creator if specified
-  const filteredVideos = useMemo(() => {
+  const creatorFilteredVideos = useMemo(() => {
     if (!creatorIdFilter) return videos;
     return videos.filter(video => video.creator_id === creatorIdFilter);
   }, [videos, creatorIdFilter]);
+
+  // Use search hook with creator-filtered videos
+  const { searchTerm, setSearchTerm, filteredVideos, clearSearch, isSearching } = useSearch(creatorFilteredVideos);
+
+  // Sync search term with URL params
+  useEffect(() => {
+    if (searchQuery && searchQuery !== searchTerm) {
+      setSearchTerm(searchQuery);
+    }
+  }, [searchQuery, searchTerm, setSearchTerm]);
+
+  // Update URL when search term changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (searchTerm.trim()) {
+      params.set('search', searchTerm);
+    } else {
+      params.delete('search');
+    }
+    if (params.toString() !== searchParams.toString()) {
+      setSearchParams(params);
+    }
+  }, [searchTerm, searchParams, setSearchParams]);
 
   // Fallback thumbnails mapping
   const fallbackThumbnails = [
@@ -54,6 +79,7 @@ const Index = () => {
   };
 
   const clearFilter = () => {
+    clearSearch();
     setSearchParams({});
   };
 
@@ -80,13 +106,29 @@ const Index = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-foreground">
-              {creatorNameFilter ? `Vidéos de ${creatorNameFilter}` : 'Toutes les vidéos'}
+              {isSearching ? `Résultats pour "${searchTerm}"` : 
+               creatorNameFilter ? `Vidéos de ${creatorNameFilter}` : 'Toutes les vidéos'}
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              {filteredVideos.length} média{filteredVideos.length !== 1 ? 's' : ''} • Incluant vidéos et audio pour lecture en arrière-plan
+              {filteredVideos.length} média{filteredVideos.length !== 1 ? 's' : ''} trouvé{filteredVideos.length !== 1 ? 's' : ''}
+              {isSearching || creatorNameFilter ? '' : ' • Incluant vidéos et audio pour lecture en arrière-plan'}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {isSearching && (
+              <Badge variant="secondary" className="flex items-center gap-2 text-xs">
+                <Search className="h-3 w-3" />
+                <span className="max-w-[120px] truncate">{searchTerm}</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={clearSearch}
+                  className="h-auto p-0 hover:bg-transparent"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            )}
             {creatorIdFilter && (
               <Badge variant="secondary" className="flex items-center gap-2 text-xs">
                 <Filter className="h-3 w-3" />
@@ -128,21 +170,25 @@ const Index = () => {
           <div className="flex items-center justify-center min-h-[50vh] px-4">
             <div className="text-center">
               <h2 className="text-lg sm:text-xl font-semibold mb-2">
-                {creatorNameFilter 
-                  ? `Aucune vidéo de ${creatorNameFilter}` 
-                  : 'Aucune vidéo trouvée'
+                {isSearching
+                  ? `Aucun résultat pour "${searchTerm}"`
+                  : creatorNameFilter 
+                    ? `Aucune vidéo de ${creatorNameFilter}` 
+                    : 'Aucune vidéo trouvée'
                 }
               </h2>
               <p className="text-sm text-muted-foreground mb-4 max-w-md">
-                {creatorNameFilter 
-                  ? 'Ce créateur n\'a pas encore de vidéos synchronisées'
-                  : 'Ajoutez des créateurs pour voir leurs vidéos apparaître ici'
+                {isSearching
+                  ? 'Essayez avec des mots-clés différents ou vérifiez l\'orthographe'
+                  : creatorNameFilter 
+                    ? 'Ce créateur n\'a pas encore de vidéos synchronisées'
+                    : 'Ajoutez des créateurs pour voir leurs vidéos apparaître ici'
                 }
               </p>
               <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                {creatorIdFilter && (
+                {(isSearching || creatorIdFilter) && (
                   <Button onClick={clearFilter} variant="outline" size="sm">
-                    Voir toutes les vidéos
+                    {isSearching ? 'Effacer la recherche' : 'Voir toutes les vidéos'}
                   </Button>
                 )}
                 <Button onClick={handleRefresh} variant="outline" size="sm">
