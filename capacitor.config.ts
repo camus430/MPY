@@ -25,12 +25,15 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: 'automatic',
     scrollEnabled: true,
-    backgroundColor: '#000000'
+    backgroundColor: '#000000',
+    allowsBackForwardNavigationGestures: true
   },
   android: {
     backgroundColor: '#000000',
     allowMixedContent: true,
-    captureInput: true
+    captureInput: true,
+    useLegacyBridge: false,
+    hideLogs: false
   }
 };
 

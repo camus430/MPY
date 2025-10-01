@@ -44,11 +44,16 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
     const media = mediaRef.current;
     if (!media) return;
 
-    // Configuration essentielle pour la lecture en arrière-plan
+    // Configuration essentielle pour la lecture en arrière-plan mobile
     media.setAttribute('playsinline', 'true');
     media.setAttribute('webkit-playsinline', 'true');
-    media.preload = 'metadata';
+    media.setAttribute('x-webkit-airplay', 'allow');
+    media.setAttribute('controlslist', 'nodownload');
+    media.preload = 'auto';
     media.volume = volume;
+    
+    // Prévenir la pause automatique en arrière-plan
+    media.setAttribute('data-keep-playing', 'true');
 
     // Configuration Media Session API pour contrôles système
     if ('mediaSession' in navigator) {
@@ -133,9 +138,28 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
     // Gestionnaire pour maintenir la lecture en arrière-plan
     const handleVisibilityChange = () => {
       if (document.hidden && !media.paused) {
-        // Page cachée mais vidéo en cours - maintenir la lecture
-        console.log('Page cachée - maintien de la lecture média');
+        console.log('App en arrière-plan - maintien de la lecture');
         media.setAttribute('data-background-playing', 'true');
+        // Forcer la lecture continue même en arrière-plan
+        const playPromise = media.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Ignorer les erreurs de lecture en arrière-plan
+            console.log('Lecture en arrière-plan maintenue');
+          });
+        }
+      } else if (!document.hidden) {
+        console.log('App au premier plan');
+        media.removeAttribute('data-background-playing');
+      }
+    };
+
+    // Empêcher la pause automatique lors du changement d'onglet/app
+    const preventAutoPause = (e: Event) => {
+      if (document.hidden && media.getAttribute('data-keep-playing') === 'true') {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
       }
     };
 
@@ -145,6 +169,7 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
     media.addEventListener('play', handlePlay);
     media.addEventListener('pause', handlePause);
     media.addEventListener('ended', handleEnded);
+    media.addEventListener('pause', preventAutoPause, true);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
@@ -153,6 +178,7 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
       media.removeEventListener('play', handlePlay);
       media.removeEventListener('pause', handlePause);
       media.removeEventListener('ended', handleEnded);
+      media.removeEventListener('pause', preventAutoPause, true);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [src, title, artist, thumbnail, volume, autoplay, isLooping]);
