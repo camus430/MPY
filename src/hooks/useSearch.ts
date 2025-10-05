@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Video } from '@/types/database';
+import { VideoWithCreator } from '@/types/database';
 
-export const useSearch = (videos: Video[]) => {
+export const useSearch = (videos: VideoWithCreator[]) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredVideos = useMemo(() => {

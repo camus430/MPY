@@ -212,6 +212,7 @@ const Index = () => {
                   duration={video.duration}
                   channelAvatar={video.creator?.avatar_url}
                   onDelete={(videoId) => deleteVideoMutation.mutate(videoId)}
+                  video={video}
                 />
               </div>
             ))}

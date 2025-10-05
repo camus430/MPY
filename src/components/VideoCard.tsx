@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import { useDownloads } from "@/hooks/useDownloads";
+import MoveVideoDialog from "@/components/MoveVideoDialog";
+import type { VideoWithCreator } from "@/types/database";
 
 interface VideoCardProps {
   id: string;
@@ -18,6 +20,7 @@ interface VideoCardProps {
   channelAvatar?: string;
   onDelete?: (id: string) => void;
   showDownloadButton?: boolean;
+  video?: VideoWithCreator | null; // Pass full video object for move functionality
 }
 
 const VideoCard = ({
@@ -31,6 +34,7 @@ const VideoCard = ({
   channelAvatar,
   onDelete,
   showDownloadButton = true,
+  video,
 }: VideoCardProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -90,6 +94,16 @@ const VideoCard = ({
             )}
           </div>
         </div>
+
+        {/* Move video action - shown below thumbnail */}
+        {video && (
+          <div 
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoveVideoDialog video={video} />
+          </div>
+        )}
 
         {/* Video info */}
         <div className={cn("flex", isMobile ? "gap-2" : "gap-3")}>
