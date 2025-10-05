@@ -16,6 +16,9 @@ interface NativeMediaPlayerProps {
   className?: string;
   loop?: boolean;
   onLoopChange?: (loop: boolean) => void;
+  onEnded?: () => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
 }
 
 const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
@@ -27,7 +30,10 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
   autoplay = false,
   className,
   loop = false,
-  onLoopChange
+  onLoopChange,
+  onEnded,
+  onPrevious,
+  onNext
 }) => {
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -86,6 +92,19 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
         const skipTime = details.seekOffset || 10;
         media.currentTime = Math.min(media.currentTime + skipTime, media.duration);
       });
+
+      // Contrôles précédent/suivant pour navigation entre vidéos
+      if (onPrevious) {
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+          onPrevious();
+        });
+      }
+
+      if (onNext) {
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+          onNext();
+        });
+      }
     }
 
     // Event listeners
@@ -132,6 +151,7 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
         if ('mediaSession' in navigator) {
           navigator.mediaSession.playbackState = 'none';
         }
+        onEnded?.();
       }
     };
 
@@ -181,7 +201,7 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
       media.removeEventListener('pause', preventAutoPause, true);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [src, title, artist, thumbnail, volume, autoplay, isLooping]);
+  }, [src, title, artist, thumbnail, volume, autoplay, isLooping, onEnded, onPrevious, onNext]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

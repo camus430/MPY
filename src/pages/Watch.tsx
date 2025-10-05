@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, DownloadIcon, RotateCcw } from "lucide-react";
+import { ArrowLeft, DownloadIcon, RotateCcw, SkipBack, SkipForward } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -18,7 +18,6 @@ const Watch = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { addDownload, removeDownload, isDownloaded, isAddingDownload, isRemovingDownload } = useDownloads();
-  const { configureVideoForBackground } = useBackgroundPlayback();
   const [isLooping, setIsLooping] = useState(false);
 
   const { data: currentVideo, isLoading } = useQuery({
@@ -45,8 +44,9 @@ const Watch = () => {
     enabled: !!videoId,
   });
 
-  const { data: creatorVideos } = useQuery({
-    queryKey: ["creator-videos", currentVideo?.creator_id],
+  // Charger toutes les vidéos du créateur (incluant la vidéo actuelle)
+  const { data: allCreatorVideos } = useQuery({
+    queryKey: ["all-creator-videos", currentVideo?.creator_id],
     queryFn: async (): Promise<VideoWithCreator[]> => {
       if (!currentVideo?.creator_id) return [];
       
@@ -57,7 +57,6 @@ const Watch = () => {
           creator:creators(*)
         `)
         .eq("creator_id", currentVideo.creator_id)
-        .neq("id", videoId)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -68,6 +67,38 @@ const Watch = () => {
       return data as VideoWithCreator[];
     },
     enabled: !!currentVideo?.creator_id,
+  });
+
+  // Trouver l'index de la vidéo actuelle et les vidéos précédente/suivante
+  const currentIndex = allCreatorVideos?.findIndex(v => v.id === videoId) ?? -1;
+  const previousVideo = currentIndex > 0 ? allCreatorVideos?.[currentIndex - 1] : null;
+  const nextVideo = currentIndex >= 0 && currentIndex < (allCreatorVideos?.length ?? 0) - 1 ? allCreatorVideos?.[currentIndex + 1] : null;
+  
+  // Vidéos du créateur (excluant la vidéo actuelle pour l'affichage dans la sidebar)
+  const otherCreatorVideos = allCreatorVideos?.filter(v => v.id !== videoId) ?? [];
+
+  const handlePrevious = () => {
+    if (previousVideo) {
+      navigate(`/watch/${previousVideo.id}`);
+    }
+  };
+
+  const handleNext = () => {
+    if (nextVideo) {
+      navigate(`/watch/${nextVideo.id}`);
+    }
+  };
+
+  const handleVideoEnd = () => {
+    if (!isLooping && nextVideo) {
+      handleNext();
+    }
+  };
+
+  // Configuration de la lecture en arrière-plan avec contrôles de navigation
+  const { configureVideoForBackground } = useBackgroundPlayback({
+    onPrevious: previousVideo ? handlePrevious : undefined,
+    onNext: nextVideo ? handleNext : undefined
   });
 
   // Extraire l'ID YouTube de l'URL de la miniature (legacy)
@@ -154,6 +185,9 @@ const Watch = () => {
                   autoplay={true}
                   loop={isLooping}
                   onLoopChange={setIsLooping}
+                  onEnded={handleVideoEnd}
+                  onPrevious={previousVideo ? handlePrevious : undefined}
+                  onNext={nextVideo ? handleNext : undefined}
                 />
               ) : youtubeVideoId ? (
                 <div className="aspect-video w-full">
@@ -204,6 +238,28 @@ const Watch = () => {
 
                   <div className="flex items-center gap-2">
                     <Button
+                      onClick={handlePrevious}
+                      variant="outline"
+                      size="sm"
+                      disabled={!previousVideo}
+                      className="gap-2"
+                      title="Vidéo précédente"
+                    >
+                      <SkipBack className="h-4 w-4" />
+                    </Button>
+                    
+                    <Button
+                      onClick={handleNext}
+                      variant="outline"
+                      size="sm"
+                      disabled={!nextVideo}
+                      className="gap-2"
+                      title="Vidéo suivante"
+                    >
+                      <SkipForward className="h-4 w-4" />
+                    </Button>
+                    
+                    <Button
                       onClick={() => setIsLooping(!isLooping)}
                       variant={isLooping ? "default" : "outline"}
                       size="sm"
@@ -244,7 +300,7 @@ const Watch = () => {
             
             <ScrollArea className="h-[calc(100vh-200px)]">
               <div className="space-y-3">
-                {creatorVideos?.map((video) => (
+                {otherCreatorVideos?.map((video) => (
                   <div
                     key={video.id}
                     onClick={() => navigate(`/watch/${video.id}`)}

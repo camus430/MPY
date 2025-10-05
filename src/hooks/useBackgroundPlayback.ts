@@ -1,6 +1,11 @@
 import { useEffect } from 'react';
 
-export const useBackgroundPlayback = () => {
+interface BackgroundPlaybackOptions {
+  onPrevious?: () => void;
+  onNext?: () => void;
+}
+
+export const useBackgroundPlayback = (options?: BackgroundPlaybackOptions) => {
   useEffect(() => {
     let wakeLock: any = null;
 
@@ -35,6 +40,19 @@ export const useBackgroundPlayback = () => {
           const media = document.querySelector('video, audio') as HTMLMediaElement;
           if (media) media.currentTime = Math.min(media.currentTime + 10, media.duration);
         });
+
+        // Contrôles de navigation entre pistes
+        if (options?.onPrevious) {
+          navigator.mediaSession.setActionHandler('previoustrack', () => {
+            options.onPrevious?.();
+          });
+        }
+
+        if (options?.onNext) {
+          navigator.mediaSession.setActionHandler('nexttrack', () => {
+            options.onNext?.();
+          });
+        }
       }
 
       // Acquérir le wake lock pour maintenir la session active
