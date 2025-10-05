@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.lovable.15fb09dd2ba14153b63e95ea753a6837',
-  appName: 'mon-petit-youtube',
+  appName: 'MPY',
   webDir: 'dist',
   server: {
     url: 'https://15fb09dd-2ba1-4153-b63e-95ea753a6837.lovableproject.com?forceHideBadge=true',

@@ -1,6 +1,6 @@
 {
-  "name": "Mon Petit YouTube",
-  "short_name": "YouTube",
+  "name": "MPY",
+  "short_name": "MPY",
   "description": "Une application YouTube personnalisée avec lecture en arrière-plan",
   "start_url": "/",
   "display": "standalone",

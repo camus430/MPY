@@ -13,7 +13,7 @@ export const useBackgroundPlayback = (options?: BackgroundPlaybackOptions) => {
       // Configuration Media Session API pour contrôles système
       if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: 'Mon Petit YouTube',
+          title: 'MPY',
           artist: 'Lecture en cours',
           artwork: [
             { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },

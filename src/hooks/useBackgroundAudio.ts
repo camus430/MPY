@@ -71,7 +71,7 @@ export const useBackgroundAudio = () => {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: meta.title,
           artist: meta.artist,
-          album: meta.album || 'Mon Petit YouTube',
+          album: meta.album || 'MPY',
           artwork: meta.artwork ? [
             { src: meta.artwork, sizes: '96x96', type: 'image/png' },
             { src: meta.artwork, sizes: '512x512', type: 'image/png' },

@@ -28,7 +28,7 @@ const AppHeader = () => {
           <div className="flex items-center gap-2">
             <Video className="h-8 w-8 text-primary" />
             <h1 className="text-xl font-bold text-foreground">
-              {isMobile ? "MPY" : "Mon Petit YouTube"}
+              MPY
             </h1>
           </div>
         </div>

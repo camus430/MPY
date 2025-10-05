@@ -84,7 +84,7 @@ const Auth = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Video className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold">Mon Petit YouTube</h1>
+            <h1 className="text-2xl font-bold">MPY</h1>
           </div>
           <p className="text-muted-foreground">
             Connectez-vous pour gérer vos créateurs et vidéos

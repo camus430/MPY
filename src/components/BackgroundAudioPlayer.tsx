@@ -55,7 +55,7 @@ const BackgroundAudioPlayer: React.FC<BackgroundAudioPlayerProps> = ({
       await playAudio('', {
         title: videoData.title,
         artist: videoData.creator,
-        album: 'Mon Petit YouTube',
+        album: 'MPY',
         artwork: videoData.thumbnail,
       });
     } catch (error) {

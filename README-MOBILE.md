@@ -1,4 +1,4 @@
-# 📱 Guide Mobile - Mon Petit YouTube
+# 📱 Guide Mobile - MPY
 
 Cette application a été configurée avec **Capacitor** pour fonctionner comme une vraie app mobile native avec lecture audio en arrière-plan et compatibilité Dynamic Island.
 
@@ -12,7 +12,7 @@ Cliquez sur "Export to GitHub" dans Lovable pour transférer le projet.
 ### 2. Clonez et installez
 ```bash
 git clone [votre-repo]
-cd mon-petit-youtube
+cd mpy
 npm install
 ```
 

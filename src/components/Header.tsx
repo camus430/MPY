@@ -35,7 +35,7 @@ const Header = ({ onMenuClick }: HeaderProps) => {
           <div className="flex items-center gap-1 sm:gap-2 min-w-0">
             <Video className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
             <h1 className="text-sm sm:text-xl font-semibold text-foreground truncate">
-              {isMobile ? "MPY" : "Mon Petit YouTube"}
+              MPY
             </h1>
           </div>
         </div>

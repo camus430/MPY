@@ -66,7 +66,7 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
       navigator.mediaSession.metadata = new MediaMetadata({
         title,
         artist,
-        album: 'Mon Petit YouTube',
+        album: 'MPY',
         artwork: thumbnail ? [
           { src: thumbnail, sizes: '96x96', type: 'image/png' },
           { src: thumbnail, sizes: '192x192', type: 'image/png' },
