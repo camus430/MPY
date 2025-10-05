@@ -155,21 +155,46 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
       }
     };
 
-    // Gestionnaire pour maintenir la lecture en arrière-plan
+    // Gestionnaire pour maintenir la lecture en arrière-plan TOUJOURS
     const handleVisibilityChange = () => {
       if (document.hidden && !media.paused) {
-        console.log('App en arrière-plan - maintien de la lecture');
+        console.log('App en arrière-plan - maintien PERMANENT de la lecture');
         media.setAttribute('data-background-playing', 'true');
+        media.setAttribute('data-keep-playing', 'true');
+        
         // Forcer la lecture continue même en arrière-plan
         const playPromise = media.play();
         if (playPromise !== undefined) {
           playPromise.catch(() => {
-            // Ignorer les erreurs de lecture en arrière-plan
             console.log('Lecture en arrière-plan maintenue');
           });
         }
+
+        // Maintenir activement la lecture toutes les 3 secondes
+        const keepPlayingInterval = setInterval(() => {
+          if (media.paused && media.getAttribute('data-keep-playing') === 'true') {
+            console.log('Relance de la lecture en arrière-plan');
+            media.play().catch(() => {});
+          }
+        }, 3000);
+
+        // Stocker l'intervalle pour le nettoyer plus tard
+        (media as any)._keepPlayingInterval = keepPlayingInterval;
+        
       } else if (!document.hidden) {
         console.log('App au premier plan');
+        
+        // Nettoyer l'intervalle de maintien
+        if ((media as any)._keepPlayingInterval) {
+          clearInterval((media as any)._keepPlayingInterval);
+          delete (media as any)._keepPlayingInterval;
+        }
+        
+        // S'assurer que la lecture continue
+        if (media.getAttribute('data-background-playing') === 'true' && media.paused) {
+          media.play().catch(() => {});
+        }
+        
         media.removeAttribute('data-background-playing');
       }
     };
@@ -177,9 +202,22 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
     // Empêcher la pause automatique lors du changement d'onglet/app
     const preventAutoPause = (e: Event) => {
       if (document.hidden && media.getAttribute('data-keep-playing') === 'true') {
+        console.log('Prévention de la pause automatique');
         e.preventDefault();
         e.stopPropagation();
         return false;
+      }
+    };
+
+    // Relancer automatiquement si pause inattendue en arrière-plan
+    const handleUnexpectedPause = () => {
+      if (document.hidden && media.getAttribute('data-keep-playing') === 'true') {
+        console.log('Pause inattendue détectée - relance');
+        setTimeout(() => {
+          if (media.paused && document.hidden) {
+            media.play().catch(() => {});
+          }
+        }, 100);
       }
     };
 
@@ -190,15 +228,23 @@ const NativeMediaPlayer: React.FC<NativeMediaPlayerProps> = ({
     media.addEventListener('pause', handlePause);
     media.addEventListener('ended', handleEnded);
     media.addEventListener('pause', preventAutoPause, true);
+    media.addEventListener('pause', handleUnexpectedPause);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      // Nettoyer l'intervalle de maintien
+      if ((media as any)._keepPlayingInterval) {
+        clearInterval((media as any)._keepPlayingInterval);
+        delete (media as any)._keepPlayingInterval;
+      }
+
       media.removeEventListener('loadedmetadata', handleLoadedMetadata);
       media.removeEventListener('timeupdate', handleTimeUpdate);
       media.removeEventListener('play', handlePlay);
       media.removeEventListener('pause', handlePause);
       media.removeEventListener('ended', handleEnded);
       media.removeEventListener('pause', preventAutoPause, true);
+      media.removeEventListener('pause', handleUnexpectedPause);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [src, title, artist, thumbnail, volume, autoplay, isLooping, onEnded, onPrevious, onNext]);

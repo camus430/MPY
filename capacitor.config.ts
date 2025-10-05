@@ -33,7 +33,9 @@ const config: CapacitorConfig = {
     allowMixedContent: true,
     captureInput: true,
     useLegacyBridge: false,
-    hideLogs: false
+    hideLogs: false,
+    // Empêcher la pause en arrière-plan
+    webContentsDebuggingEnabled: true
   }
 };
 
