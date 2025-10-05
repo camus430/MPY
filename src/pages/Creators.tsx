@@ -1,14 +1,28 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Users, Video } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, Video, Trash2 } from "lucide-react";
 import CreateCreatorDialog from "@/components/CreateCreatorDialog";
 import { useCreators } from "@/hooks/useVideos";
+import { useDeleteCreator } from "@/hooks/useDeleteCreator";
 import { formatViewCount } from "@/utils/formatters";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Creators = () => {
   const { data: creators = [], isLoading, error } = useCreators();
+  const deleteCreator = useDeleteCreator();
 
   if (error) {
     return (
@@ -67,19 +81,49 @@ const Creators = () => {
             {creators.map((creator) => (
               <Card key={creator.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={creator.avatar_url || ''} alt={creator.name} />
-                      <AvatarFallback className="text-lg font-bold bg-primary text-primary-foreground">
-                        {creator.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg truncate">{creator.name}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {creator.youtube_channel_id ? `ID: ${creator.youtube_channel_id}` : 'Aucun ID'}
-                      </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={creator.avatar_url || ''} alt={creator.name} />
+                        <AvatarFallback className="text-lg font-bold bg-primary text-primary-foreground">
+                          {creator.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg truncate">{creator.name}</CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          {creator.youtube_channel_id ? `ID: ${creator.youtube_channel_id}` : 'Aucun ID'}
+                        </p>
+                      </div>
                     </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Supprimer le créateur</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Êtes-vous sûr de vouloir supprimer "{creator.name}" ? Toutes les vidéos associées à ce créateur seront également supprimées. Cette action est irréversible.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => deleteCreator.mutate(creator.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Supprimer
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </CardHeader>
                 <CardContent>
