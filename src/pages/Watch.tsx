@@ -2,7 +2,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, DownloadIcon, RotateCcw, SkipBack, SkipForward, PlayCircle } from "lucide-react";
+import { ArrowLeft, DownloadIcon, RotateCcw, SkipBack, SkipForward } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -20,7 +20,6 @@ const Watch = () => {
   const isMobile = useIsMobile();
   const { addDownload, removeDownload, isDownloaded, isAddingDownload, isRemovingDownload } = useDownloads();
   const [isLooping, setIsLooping] = useState(false);
-  const [autoplayEnabled, setAutoplayEnabled] = useState(true);
 
   // Vérifier si on vient d'un filtre de créateur
   const fromCreatorFilter = searchParams.get('from') === 'creator';
@@ -101,7 +100,7 @@ const Watch = () => {
   };
 
   const handleVideoEnd = () => {
-    if (!isLooping && autoplayEnabled && nextVideo) {
+    if (!isLooping && nextVideo) {
       handleNext();
     }
   };
@@ -131,7 +130,7 @@ const Watch = () => {
         const data = JSON.parse(event.data);
         // État 0 = vidéo terminée
         if (data.event === 'onStateChange' && data.info === 0) {
-          console.log('Vidéo YouTube terminée, autoplay:', autoplayEnabled, 'isLooping:', isLooping);
+          console.log('Vidéo YouTube terminée');
           handleVideoEnd();
         }
       } catch (e) {
@@ -142,7 +141,7 @@ const Watch = () => {
     window.addEventListener('message', handleMessage);
     
     return () => window.removeEventListener('message', handleMessage);
-  }, [youtubeVideoId, autoplayEnabled, isLooping, nextVideo]);
+  }, [youtubeVideoId, isLooping, nextVideo]);
   
   // Déterminer le type de lecteur à utiliser
   const getMediaUrl = () => {
@@ -293,17 +292,6 @@ const Watch = () => {
                       title="Vidéo suivante"
                     >
                       <SkipForward className="h-4 w-4" />
-                    </Button>
-                    
-                    <Button
-                      onClick={() => setAutoplayEnabled(!autoplayEnabled)}
-                      variant={autoplayEnabled ? "default" : "outline"}
-                      size="sm"
-                      className="gap-2"
-                      title={autoplayEnabled ? "Désactiver la lecture auto" : "Activer la lecture auto"}
-                    >
-                      <PlayCircle className="h-4 w-4" />
-                      {autoplayEnabled ? "Auto ON" : "Auto"}
                     </Button>
                     
                     <Button
