@@ -11,7 +11,7 @@ import { useDownloads } from "@/hooks/useDownloads";
 import { useBackgroundPlayback } from "@/hooks/useBackgroundPlayback";
 import NativeMediaPlayer from "@/components/NativeMediaPlayer";
 import type { VideoWithCreator } from "@/types/database";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Watch = () => {
   const { videoId } = useParams();
@@ -120,6 +120,30 @@ const Watch = () => {
 
   const youtubeVideoId = currentVideo?.file_type === 'youtube' ? getYouTubeVideoId(currentVideo.thumbnail_url) : null;
   
+  // Gérer l'événement de fin de vidéo YouTube
+  useEffect(() => {
+    if (!youtubeVideoId) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://www.youtube.com') return;
+      
+      try {
+        const data = JSON.parse(event.data);
+        // État 0 = vidéo terminée
+        if (data.event === 'onStateChange' && data.info === 0) {
+          console.log('Vidéo YouTube terminée, autoplay:', autoplayEnabled, 'isLooping:', isLooping);
+          handleVideoEnd();
+        }
+      } catch (e) {
+        // Ignorer les messages non-JSON
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    
+    return () => window.removeEventListener('message', handleMessage);
+  }, [youtubeVideoId, autoplayEnabled, isLooping, nextVideo]);
+  
   // Déterminer le type de lecteur à utiliser
   const getMediaUrl = () => {
     if (!currentVideo) return null;
@@ -203,6 +227,7 @@ const Watch = () => {
               ) : youtubeVideoId ? (
                 <div className="aspect-video w-full">
                   <iframe
+                    id="youtube-player"
                     ref={(iframe) => {
                       if (iframe) {
                         configureVideoForBackground(iframe);
