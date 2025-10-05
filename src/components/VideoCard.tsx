@@ -45,7 +45,15 @@ const VideoCard = ({
   return (
     <Card 
       className="group cursor-pointer border-0 bg-transparent shadow-none hover:shadow-none"
-      onClick={() => navigate(`/watch/${id}`)}
+      onClick={() => {
+        // Ne pas propager le clic si on clique sur un bouton
+        const currentUrl = new URL(window.location.href);
+        const creatorFilter = currentUrl.searchParams.get('creator');
+        const navigatePath = creatorFilter 
+          ? `/watch/${id}?from=creator` 
+          : `/watch/${id}`;
+        navigate(navigatePath);
+      }}
     >
       <div className={cn("space-y-2", isMobile ? "space-y-2" : "space-y-3")}>
         {/* Thumbnail */}

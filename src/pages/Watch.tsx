@@ -1,8 +1,8 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, DownloadIcon, RotateCcw, SkipBack, SkipForward } from "lucide-react";
+import { ArrowLeft, DownloadIcon, RotateCcw, SkipBack, SkipForward, PlayCircle } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -16,9 +16,14 @@ import { useState } from "react";
 const Watch = () => {
   const { videoId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const { addDownload, removeDownload, isDownloaded, isAddingDownload, isRemovingDownload } = useDownloads();
   const [isLooping, setIsLooping] = useState(false);
+  const [autoplayEnabled, setAutoplayEnabled] = useState(true);
+
+  // Vérifier si on vient d'un filtre de créateur
+  const fromCreatorFilter = searchParams.get('from') === 'creator';
 
   const { data: currentVideo, isLoading } = useQuery({
     queryKey: ["video", videoId],
@@ -44,38 +49,44 @@ const Watch = () => {
     enabled: !!videoId,
   });
 
-  // Charger toutes les vidéos du créateur (incluant la vidéo actuelle)
-  const { data: allCreatorVideos } = useQuery({
-    queryKey: ["all-creator-videos", currentVideo?.creator_id],
+  // Charger toutes les vidéos du créateur OU toutes les vidéos selon la provenance
+  const { data: allVideos } = useQuery({
+    queryKey: ["related-videos", currentVideo?.creator_id, fromCreatorFilter],
     queryFn: async (): Promise<VideoWithCreator[]> => {
-      if (!currentVideo?.creator_id) return [];
+      if (!currentVideo) return [];
       
-      const { data, error } = await supabase
+      const query = supabase
         .from("videos")
         .select(`
           *,
           creator:creators(*)
         `)
-        .eq("creator_id", currentVideo.creator_id)
         .order("created_at", { ascending: false });
 
+      // Si on vient d'un filtre créateur, ne montrer que les vidéos de ce créateur
+      if (fromCreatorFilter) {
+        query.eq("creator_id", currentVideo.creator_id);
+      }
+
+      const { data, error } = await query;
+
       if (error) {
-        console.error("Erreur lors du chargement des vidéos du créateur:", error);
+        console.error("Erreur lors du chargement des vidéos:", error);
         throw error;
       }
 
       return data as VideoWithCreator[];
     },
-    enabled: !!currentVideo?.creator_id,
+    enabled: !!currentVideo,
   });
 
   // Trouver l'index de la vidéo actuelle et les vidéos précédente/suivante
-  const currentIndex = allCreatorVideos?.findIndex(v => v.id === videoId) ?? -1;
-  const previousVideo = currentIndex > 0 ? allCreatorVideos?.[currentIndex - 1] : null;
-  const nextVideo = currentIndex >= 0 && currentIndex < (allCreatorVideos?.length ?? 0) - 1 ? allCreatorVideos?.[currentIndex + 1] : null;
+  const currentIndex = allVideos?.findIndex(v => v.id === videoId) ?? -1;
+  const previousVideo = currentIndex > 0 ? allVideos?.[currentIndex - 1] : null;
+  const nextVideo = currentIndex >= 0 && currentIndex < (allVideos?.length ?? 0) - 1 ? allVideos?.[currentIndex + 1] : null;
   
-  // Vidéos du créateur (excluant la vidéo actuelle pour l'affichage dans la sidebar)
-  const otherCreatorVideos = allCreatorVideos?.filter(v => v.id !== videoId) ?? [];
+  // Vidéos à afficher (excluant la vidéo actuelle)
+  const otherVideos = allVideos?.filter(v => v.id !== videoId) ?? [];
 
   const handlePrevious = () => {
     if (previousVideo) {
@@ -90,7 +101,7 @@ const Watch = () => {
   };
 
   const handleVideoEnd = () => {
-    if (!isLooping && nextVideo) {
+    if (!isLooping && autoplayEnabled && nextVideo) {
       handleNext();
     }
   };
@@ -260,6 +271,17 @@ const Watch = () => {
                     </Button>
                     
                     <Button
+                      onClick={() => setAutoplayEnabled(!autoplayEnabled)}
+                      variant={autoplayEnabled ? "default" : "outline"}
+                      size="sm"
+                      className="gap-2"
+                      title={autoplayEnabled ? "Désactiver la lecture auto" : "Activer la lecture auto"}
+                    >
+                      <PlayCircle className="h-4 w-4" />
+                      {autoplayEnabled ? "Auto ON" : "Auto"}
+                    </Button>
+                    
+                    <Button
                       onClick={() => setIsLooping(!isLooping)}
                       variant={isLooping ? "default" : "outline"}
                       size="sm"
@@ -292,18 +314,18 @@ const Watch = () => {
             </div>
           </div>
 
-          {/* Colonne des vidéos du créateur */}
+          {/* Colonne des vidéos */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground">
-              Plus de {currentVideo.creator.name}
+              {fromCreatorFilter ? `Plus de ${currentVideo.creator.name}` : 'Toutes les vidéos'}
             </h2>
             
             <ScrollArea className="h-[calc(100vh-200px)]">
-              <div className="space-y-3">
-                {otherCreatorVideos?.map((video) => (
+              <div className="grid grid-cols-1 gap-3">
+                {otherVideos?.map((video) => (
                   <div
                     key={video.id}
-                    onClick={() => navigate(`/watch/${video.id}`)}
+                    onClick={() => navigate(`/watch/${video.id}${fromCreatorFilter ? '?from=creator' : ''}`)}
                     className="flex gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors"
                   >
                     <div className="relative w-32 aspect-video flex-shrink-0">
@@ -321,6 +343,9 @@ const Watch = () => {
                       <h3 className="font-medium text-sm line-clamp-2 text-foreground mb-1">
                         {video.title}
                       </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {video.creator.name}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {formatViews(video.view_count)}
                       </p>
